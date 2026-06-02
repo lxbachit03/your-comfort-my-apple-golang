@@ -2,40 +2,45 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
+	v1handler "github.com/lxbachit03/your-comfort-my-apple-golang/internal/api/v1/handler"
+	v2handler "github.com/lxbachit03/your-comfort-my-apple-golang/internal/api/v2/handler"
 )
 
 func main() {
 	r := gin.Default()
 
-	r.GET("/demo", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"message": "demo routes",
-		})
-	})
+	v1Group := r.Group("api/v1")
+	{
+		userHandlerV1 := v1handler.NewUserHandler()
 
-	r.GET("/languages/:lang", func(ctx *gin.Context) {
-		pathParam := ctx.Param("lang")
+		userGroup := v1Group.Group("users")
+		{
+			userGroup.GET("/", userHandlerV1.GetUsersV1)
+		}
 
-		ctx.JSON(200, gin.H{
-			"message": "languages route",
-			"path":    pathParam,
-		})
-	})
+		productGroup := v1Group.Group("products")
+		{
+			productGroup.GET("/", func(ctx *gin.Context) {
+				ctx.JSON(http.StatusOK, gin.H{
+					"message": "get products v1",
+				})
+			})
+		}
+	}
 
-	r.GET("/language/golang", func(ctx *gin.Context) {
+	v2Group := r.Group("/api/v2")
+	{
+		userHandlerV2 := v2handler.NewUserHandler()
 
-		price := ctx.Query("price")
-		level := ctx.Query("level")
+		userGroup := v2Group.Group("/users")
+		{
+			userGroup.GET("/", userHandlerV2.GetUsersV2)
+		}
 
-		ctx.JSON(200, gin.H{
-			"message": "golang route",
-			"path":    "golang",
-			"price":   price,
-			"level":   level,
-		})
-	})
+	}
 
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("failed to run server: %v", err)
