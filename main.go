@@ -6,10 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 	v1handler "github.com/lxbachit03/your-comfort-my-apple-golang/internal/api/v1/handler"
 	v2handler "github.com/lxbachit03/your-comfort-my-apple-golang/internal/api/v2/handler"
+	"github.com/lxbachit03/your-comfort-my-apple-golang/utils"
 )
 
 func main() {
 	r := gin.Default()
+
+	if err := utils.RegisterCustomValidators(); err != nil {
+		panic(err)
+	}
 
 	v1Group := r.Group("api/v1")
 	{
@@ -19,13 +24,14 @@ func main() {
 		userGroup := v1Group.Group("users")
 		{
 			userGroup.GET("/", userHandlerV1.GetUsersV1)
-			userGroup.GET(("/:uuid"), userHandlerV1.GetUserByUUID)
+			userGroup.GET("/:uuid", userHandlerV1.GetUserByUUID)
 		}
 
 		productGroup := v1Group.Group("products")
 		{
 			productGroup.GET("/", productHandlerV1.GetProductsV1)
-			productGroup.GET(("/:id"), productHandlerV1.GetProductById)
+			productGroup.GET("/test/:id", productHandlerV1.GetProductById)
+			productGroup.GET("/details/:slug", productHandlerV1.GetProductBySlug)
 		}
 	}
 

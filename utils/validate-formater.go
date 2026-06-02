@@ -17,6 +17,8 @@ func FormatValidationError(err error) gin.H {
 				errorsMap[e.Field()] = "Invalid format (must be UUID)"
 			case "gt":
 				errorsMap[e.Field()] = fmt.Sprintf("Must be greater than %v", e.Param())
+			case "slug":
+				errorsMap[e.Field()] = "Invalid slug format"
 			default:
 				errorsMap[e.Field()] = fmt.Sprintf("Invalid value %v on %s tag", e.Value(), e.Tag())
 			}
