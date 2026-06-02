@@ -25,7 +25,7 @@ func main() {
 		productGroup := v1Group.Group("products")
 		{
 			productGroup.GET("/", productHandlerV1.GetProductsV1)
-			productGroup.GET(("/product/:id"))
+			productGroup.GET(("/:id"), productHandlerV1.GetProductById)
 		}
 	}
 

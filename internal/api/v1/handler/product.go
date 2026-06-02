@@ -4,9 +4,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	utils "github.com/lxbachit03/your-comfort-my-apple-golang/utils"
 )
 
 type ProductHandler struct{}
+
+// validators
+type GetProductByIdPathParam struct {
+	Id int `uri:"id" binding:"gt=0"`
+}
 
 func NewProductHandler() *ProductHandler {
 	return &ProductHandler{}
@@ -15,5 +21,18 @@ func NewProductHandler() *ProductHandler {
 func (ProductHandler *ProductHandler) GetProductsV1(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "get products v1",
+	})
+}
+
+func (ProductHandler *ProductHandler) GetProductById(ctx *gin.Context) {
+	var param GetProductByIdPathParam
+
+	if err := ctx.ShouldBindUri(&param); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.FormatValidationError(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"id": param.Id,
 	})
 }
