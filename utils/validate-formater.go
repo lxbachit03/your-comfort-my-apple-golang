@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -19,6 +20,9 @@ func FormatValidationError(err error) gin.H {
 				errorsMap[e.Field()] = fmt.Sprintf("Must be greater than %v", e.Param())
 			case "slug":
 				errorsMap[e.Field()] = "Invalid slug format"
+			case "oneof":
+				allowedList := strings.Join(strings.Split(e.Param(), " "), ", ")
+				errorsMap[e.Field()] = fmt.Sprintf("Value must be one of: %v", allowedList)
 			default:
 				errorsMap[e.Field()] = fmt.Sprintf("Invalid value %v on %s tag", e.Value(), e.Tag())
 			}

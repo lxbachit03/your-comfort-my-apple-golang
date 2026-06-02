@@ -20,6 +20,7 @@ func main() {
 	{
 		userHandlerV1 := v1handler.NewUserHandler()
 		productHandlerV1 := v1handler.NewProductHandler()
+		categoryHandlerV1 := v1handler.NewCategoryHandler()
 
 		userGroup := v1Group.Group("users")
 		{
@@ -32,6 +33,11 @@ func main() {
 			productGroup.GET("/", productHandlerV1.GetProductsV1)
 			productGroup.GET("/test/:id", productHandlerV1.GetProductById)
 			productGroup.GET("/details/:slug", productHandlerV1.GetProductBySlug)
+		}
+
+		categoryGroup := v1Group.Group("categories")
+		{
+			categoryGroup.GET("/:path", categoryHandlerV1.GetCategoryByPath)
 		}
 	}
 
