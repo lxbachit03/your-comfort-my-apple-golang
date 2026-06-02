@@ -33,6 +33,7 @@ func main() {
 			productGroup.GET("/", productHandlerV1.GetProductsV1)
 			productGroup.GET("/test/:id", productHandlerV1.GetProductById)
 			productGroup.GET("/details/:slug", productHandlerV1.GetProductBySlug)
+			productGroup.POST("/", productHandlerV1.PostProduct)
 		}
 
 		categoryGroup := v1Group.Group("categories")

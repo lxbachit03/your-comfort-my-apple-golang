@@ -25,6 +25,31 @@ type GetProductsV1QueryParam struct {
 	Date   string `form:"date" binding:"omitempty,datetime=2006-01-02"`
 }
 
+type ProductImage struct {
+	ImageName string `json:"image_name" binding:"required"`
+	ImageUrl  string `json:"image_url" binding:"required"`
+}
+
+type ProductAttribute struct {
+	Name  string `json:"name" binding:"required"`
+	Value string `json:"value" binding:"required"`
+}
+
+type ProductInfo struct {
+	InfoKey   string `json:"info_key" binding:"required"`
+	InfoValue string `json:"info_value" binding:"required"`
+}
+
+type PostProductPostBody struct {
+	Name              string                 `json:"name" binding:"required"`
+	Price             float64                `json:"price" binding:"required,gte=0"`
+	Display           *bool                  `json:"display" binding:"omitempty"`
+	ProductImage      ProductImage           `json:"product_image" binding:"required"`
+	Tags              []string               `json:"tags" binding:"required,gt=3"`
+	ProductAttributes []ProductAttribute     `json:"product_attributes" binding:"required,gt=0,dive"`
+	ProductInfo       map[string]ProductInfo `json:"product_info" binding:"required,gt=0,dive"`
+}
+
 func NewProductHandler() *ProductHandler {
 	return &ProductHandler{}
 }
@@ -75,5 +100,18 @@ func (ProductHandler *ProductHandler) GetProductBySlug(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"slug": param.Slug,
+	})
+}
+
+func (ProductHandler *ProductHandler) PostProduct(ctx *gin.Context) {
+	var body PostProductPostBody
+
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.FormatValidationError(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"body": body,
 	})
 }
