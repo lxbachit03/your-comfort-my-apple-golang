@@ -20,6 +20,9 @@ type GetProductBySlugPathParam struct {
 
 type GetProductsV1QueryParam struct {
 	Search string `form:"search" binding:"omitempty,search"`
+	Limit  int    `form:"limit" binding:"omitempty,lte=50"`
+	Offset int    `form:"offset" binding:"omitempty,gte=1"`
+	Date   string `form:"date" binding:"omitempty,datetime=2006-01-02"`
 }
 
 func NewProductHandler() *ProductHandler {
@@ -33,6 +36,14 @@ func (ProductHandler *ProductHandler) GetProductsV1(ctx *gin.Context) {
 	if err := ctx.ShouldBindQuery(&queryParams); err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.FormatValidationError(err))
 		return
+	}
+
+	if queryParams.Limit == 0 {
+		queryParams.Limit = 10
+	}
+
+	if queryParams.Offset == 0 {
+		queryParams.Offset = 1
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
