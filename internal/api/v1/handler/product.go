@@ -18,13 +18,26 @@ type GetProductBySlugPathParam struct {
 	Slug string `uri:"slug" binding:"slug"`
 }
 
+type GetProductsV1QueryParam struct {
+	Search string `form:"search" binding:"omitempty,search"`
+}
+
 func NewProductHandler() *ProductHandler {
 	return &ProductHandler{}
 }
 
 func (ProductHandler *ProductHandler) GetProductsV1(ctx *gin.Context) {
+
+	var queryParams GetProductsV1QueryParam
+
+	if err := ctx.ShouldBindQuery(&queryParams); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.FormatValidationError(err))
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "get products v1",
+		"params":  queryParams,
 	})
 }
 

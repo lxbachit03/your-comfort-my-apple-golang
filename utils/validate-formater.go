@@ -23,6 +23,8 @@ func FormatValidationError(err error) gin.H {
 			case "oneof":
 				allowedList := strings.Join(strings.Split(e.Param(), " "), ", ")
 				errorsMap[e.Field()] = fmt.Sprintf("Value must be one of: %v", allowedList)
+			case "search":
+				errorsMap[e.Field()] = "Search query only accepts letters, numbers, and spaces"
 			default:
 				errorsMap[e.Field()] = fmt.Sprintf("Invalid value %v on %s tag", e.Value(), e.Tag())
 			}
