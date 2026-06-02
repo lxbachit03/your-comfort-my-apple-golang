@@ -2,32 +2,42 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	v1handler "github.com/lxbachit03/your-comfort-my-apple-golang/internal/api/v1/handler"
 	v2handler "github.com/lxbachit03/your-comfort-my-apple-golang/internal/api/v2/handler"
+	"github.com/lxbachit03/your-comfort-my-apple-golang/utils"
 )
 
 func main() {
 	r := gin.Default()
 
+	if err := utils.RegisterCustomValidators(); err != nil {
+		panic(err)
+	}
+
 	v1Group := r.Group("api/v1")
 	{
 		userHandlerV1 := v1handler.NewUserHandler()
+		productHandlerV1 := v1handler.NewProductHandler()
+		categoryHandlerV1 := v1handler.NewCategoryHandler()
 
 		userGroup := v1Group.Group("users")
 		{
 			userGroup.GET("/", userHandlerV1.GetUsersV1)
+			userGroup.GET("/:uuid", userHandlerV1.GetUserByUUID)
 		}
 
 		productGroup := v1Group.Group("products")
 		{
-			productGroup.GET("/", func(ctx *gin.Context) {
-				ctx.JSON(http.StatusOK, gin.H{
-					"message": "get products v1",
-				})
-			})
+			productGroup.GET("/", productHandlerV1.GetProductsV1)
+			productGroup.GET("/test/:id", productHandlerV1.GetProductById)
+			productGroup.GET("/details/:slug", productHandlerV1.GetProductBySlug)
+		}
+
+		categoryGroup := v1Group.Group("categories")
+		{
+			categoryGroup.GET("/:path", categoryHandlerV1.GetCategoryByPath)
 		}
 	}
 
