@@ -8,7 +8,7 @@
     "referer": "http://localhost:8080/api/v1/products",
     "protocol": "HTTP/1.1",
     "host": "localhost:8080",
-    "remote_addr": "[::1]:56743",
+    "remote_addr": "[::1]:60286",
     "request_uri": "/api/v1/products/",
     "content_length": 412,
     "headers": {
@@ -31,7 +31,7 @@
             "application/json"
         ],
         "Postman-Token": [
-            "7a8eb72f-7981-4c94-8ab7-47a581f67b04"
+            "4b8c5d57-3498-4b4c-bbf8-28790448e6e4"
         ],
         "Referer": [
             "http://localhost:8080/api/v1/products"
@@ -40,8 +40,35 @@
             "PostmanRuntime/7.54.0"
         ]
     },
+    "request_body": {
+        "display": false,
+        "name": "test",
+        "price": 10,
+        "product_attributes": [
+            {
+                "name": "test",
+                "value": "test"
+            }
+        ],
+        "product_image": {
+            "image_name": "test",
+            "image_url": "url"
+        },
+        "product_info": {
+            "a": {
+                "info_key": "test",
+                "info_value": "test"
+            }
+        },
+        "tags": [
+            "a",
+            "b",
+            "c",
+            "d"
+        ]
+    },
     "status_code": 200,
     "duration_ms": 1,
-    "time": "2026-06-03T19:10:01+07:00",
+    "time": "2026-06-03T20:19:22+07:00",
     "message": "HTTP Request Log"
 }
