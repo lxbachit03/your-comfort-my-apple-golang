@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -48,6 +49,26 @@ func getClientIp(ctx *gin.Context) string {
 	}
 
 	return clientIp
+}
+
+func CleanUpRateLimiter() {
+	for {
+		time.Sleep(time.Minute)
+
+		mu.Lock()
+
+		log.Printf("clientIps: %+v", clientIps)
+		log.Print("=-=-=-=-=-=-=-=-=")
+		for ip, clientIpRateLimit := range clientIps {
+			log.Print("lastSeen: ", clientIpRateLimit.lastSeen)
+			log.Print("since: ", time.Since(clientIpRateLimit.lastSeen))
+			if time.Since(clientIpRateLimit.lastSeen) > 1*time.Minute {
+				delete(clientIps, ip)
+			}
+		}
+
+		mu.Unlock()
+	}
 }
 
 // ab -n 20 -c 1 -H "X-API-Key:b3f6590f-20a9-4843-84df-9156d5f37306" http://localhost:8080/api/v1/users/
