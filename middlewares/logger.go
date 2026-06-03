@@ -3,6 +3,7 @@ package middlewares
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/url"
@@ -35,12 +36,39 @@ func LoggerMiddleware() gin.HandlerFunc {
 		logEvent := logger.Info()
 		startedAt := time.Now()
 		requestBody := make(map[string]any)
+		formFiles := []map[string]any{}
 
 		requestContentType := ctx.GetHeader("Content-Type")
 
 		log.Print("requestContentType: ", requestContentType)
 
 		if strings.HasPrefix(requestContentType, "multipart/form-data") {
+
+			if err := ctx.Request.ParseMultipartForm(32 << 20); err == nil && ctx.Request.MultipartForm != nil {
+				for k, v := range ctx.Request.MultipartForm.Value {
+					if len(v) == 1 {
+						requestBody[k] = v[0]
+					} else {
+						requestBody[k] = v
+					}
+				}
+
+				for field, files := range ctx.Request.MultipartForm.File {
+
+					for _, file := range files {
+						formFiles = append(formFiles, map[string]any{
+							"field":        field,
+							"file_name":    file.Filename,
+							"file_size":    formatByteSize(file.Size),
+							"content_type": file.Header.Get("Content-Type"),
+						})
+					}
+				}
+
+				if len(formFiles) > 0 {
+					requestBody["form_files"] = formFiles
+				}
+			}
 
 		} else {
 			bodyBytes, err := io.ReadAll(ctx.Request.Body)
@@ -101,5 +129,21 @@ func LoggerMiddleware() gin.HandlerFunc {
 			Int64("duration_ms", time.Since(startedAt).Milliseconds()).
 			Msg("HTTP Request Log")
 
+	}
+}
+
+func formatByteSize(size int64) string {
+	const (
+		KB = 1 << 10
+		MB = 1 << 20
+	)
+
+	switch {
+	case size >= MB:
+		return fmt.Sprintf("%.2f MB", float64(size)/MB)
+	case size >= KB:
+		return fmt.Sprintf("%.2f KB", float64(size)/KB)
+	default:
+		return fmt.Sprintf("%d B", size)
 	}
 }
