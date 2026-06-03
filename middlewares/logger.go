@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -57,6 +58,14 @@ func LoggerMiddleware() gin.HandlerFunc {
 					logger.Error().Err(err).Msg("failed to unmarshal request body")
 				}
 			} else if strings.HasPrefix(requestContentType, "application/x-www-form-urlencoded") {
+				queries, _ := url.ParseQuery(string(bodyBytes))
+				for k, v := range queries {
+					if len(v) == 1 {
+						requestBody[k] = v[0]
+					} else {
+						requestBody[k] = v
+					}
+				}
 			}
 
 		}
