@@ -4,9 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"log"
-	"net/url"
 	"strings"
 	"time"
 
@@ -53,70 +50,6 @@ func LoggerMiddleware() gin.HandlerFunc {
 
 		logEvent := logger.Info()
 		startedAt := time.Now()
-
-		requestContentType := ctx.GetHeader("Content-Type")
-
-		if strings.HasPrefix(requestContentType, "multipart/form-data") {
-
-			if err := ctx.Request.ParseMultipartForm(32 << 20); err == nil && ctx.Request.MultipartForm != nil {
-				for k, v := range ctx.Request.MultipartForm.Value {
-					if len(v) == 1 {
-						requestBody[k] = v[0]
-					} else {
-						requestBody[k] = v
-					}
-				}
-
-				for field, files := range ctx.Request.MultipartForm.File {
-
-					for _, file := range files {
-						formFiles = append(formFiles, map[string]any{
-							"field":        field,
-							"file_name":    file.Filename,
-							"file_size":    formatByteSize(file.Size),
-							"content_type": file.Header.Get("Content-Type"),
-						})
-					}
-				}
-
-				if len(formFiles) > 0 {
-					requestBody["form_files"] = formFiles
-				}
-			}
-
-		} else {
-			bodyBytes, err := io.ReadAll(ctx.Request.Body)
-
-			if err != nil {
-				logger.Error().Err(err).Msg("failed to read request body")
-			}
-
-			ctx.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
-
-			log.Print("requestBody: ", string(bodyBytes))
-
-			if strings.HasPrefix(requestContentType, "application/json") {
-				if err := json.Unmarshal(bodyBytes, &requestBody); err != nil {
-					logger.Error().Err(err).Msg("failed to unmarshal request body")
-				}
-			} else if strings.HasPrefix(requestContentType, "application/x-www-form-urlencoded") {
-				queries, _ := url.ParseQuery(string(bodyBytes))
-				for k, v := range queries {
-					if len(v) == 1 {
-						requestBody[k] = v[0]
-					} else {
-						requestBody[k] = v
-					}
-				}
-			}
-
-		}
-
-		customLogResponseWriter := &LogResponseWriter{
-			ResponseWriter: ctx.Writer,
-			responseBody:   bytes.NewBufferString(""),
-		}
-		ctx.Writer = customLogResponseWriter
 
 		ctx.Next()
 
