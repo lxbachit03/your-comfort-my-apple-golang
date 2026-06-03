@@ -14,8 +14,22 @@ type GetCategoryByPathParam struct {
 	Path string `uri:"path" binding:"oneof=men women electronics"`
 }
 
+type CreateCategoryRequestBody struct {
+	Name string `json:"name" binding:"required"`
+}
+
 func NewCategoryHandler() *CategoryHandler {
 	return &CategoryHandler{}
+}
+
+func (categoryHandler *CategoryHandler) CreateCategory(ctx *gin.Context) {
+
+	var body CreateCategoryRequestBody
+
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.FormatValidationError(err))
+		return
+	}
 }
 
 func (categoryHandler *CategoryHandler) GetCategoryByPath(ctx *gin.Context) {

@@ -1,8 +1,10 @@
 package middlewares
 
 import (
+	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +31,20 @@ func LoggerMiddleware() gin.HandlerFunc {
 		logEvent := logger.Info()
 
 		startedAt := time.Now()
+
+		requestContentType := ctx.GetHeader("Content-Type")
+
+		log.Print("requestContentType: ", requestContentType)
+
+		if strings.HasPrefix(requestContentType, "multipart/form-data") {
+
+		} else if strings.HasPrefix(requestContentType, "application/json") {
+
+		} else if strings.HasPrefix(requestContentType, "application/x-www-form-urlencoded") {
+
+		} else {
+
+		}
 
 		ctx.Next()
 
