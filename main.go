@@ -22,6 +22,10 @@ func main() {
 
 	r := gin.Default()
 
+	r.Use(middlewares.RateLimiterMiddleware())
+
+	go middlewares.CleanUpRateLimiter()
+
 	v1Group := r.Group("api/v1")
 	{
 		userHandlerV1 := v1handler.NewUserHandler()
