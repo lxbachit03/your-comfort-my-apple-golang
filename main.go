@@ -4,17 +4,23 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	v1handler "github.com/lxbachit03/your-comfort-my-apple-golang/internal/api/v1/handler"
 	v2handler "github.com/lxbachit03/your-comfort-my-apple-golang/internal/api/v2/handler"
+	"github.com/lxbachit03/your-comfort-my-apple-golang/middlewares"
 	"github.com/lxbachit03/your-comfort-my-apple-golang/utils"
 )
 
 func main() {
-	r := gin.Default()
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("failed to load environment variables: %v", err)
+	}
 
 	if err := utils.RegisterCustomValidators(); err != nil {
 		panic(err)
 	}
+
+	r := gin.Default()
 
 	v1Group := r.Group("api/v1")
 	{
@@ -22,7 +28,7 @@ func main() {
 		productHandlerV1 := v1handler.NewProductHandler()
 		categoryHandlerV1 := v1handler.NewCategoryHandler()
 
-		userGroup := v1Group.Group("users")
+		userGroup := v1Group.Group("users").Use(middlewares.ApiKeyMiddleware())
 		{
 			userGroup.GET("/", userHandlerV1.GetUsersV1)
 			userGroup.GET("/:uuid", userHandlerV1.GetUserByUUID)
