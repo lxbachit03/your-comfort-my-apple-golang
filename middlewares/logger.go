@@ -1,6 +1,9 @@
 package middlewares
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -29,8 +32,8 @@ func LoggerMiddleware() gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
 		logEvent := logger.Info()
-
 		startedAt := time.Now()
+		requestBody := make(map[string]any)
 
 		requestContentType := ctx.GetHeader("Content-Type")
 
@@ -38,11 +41,23 @@ func LoggerMiddleware() gin.HandlerFunc {
 
 		if strings.HasPrefix(requestContentType, "multipart/form-data") {
 
-		} else if strings.HasPrefix(requestContentType, "application/json") {
-
-		} else if strings.HasPrefix(requestContentType, "application/x-www-form-urlencoded") {
-
 		} else {
+			bodyBytes, err := io.ReadAll(ctx.Request.Body)
+
+			if err != nil {
+				logger.Error().Err(err).Msg("failed to read request body")
+			}
+
+			ctx.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+			log.Print("requestBody: ", string(bodyBytes))
+
+			if strings.HasPrefix(requestContentType, "application/json") {
+				if err := json.Unmarshal(bodyBytes, &requestBody); err != nil {
+					logger.Error().Err(err).Msg("failed to unmarshal request body")
+				}
+			} else if strings.HasPrefix(requestContentType, "application/x-www-form-urlencoded") {
+			}
 
 		}
 
@@ -71,7 +86,7 @@ func LoggerMiddleware() gin.HandlerFunc {
 			Str("request_uri", ctx.Request.RequestURI).
 			Int64("content_length", ctx.Request.ContentLength).
 			Interface("headers", ctx.Request.Header).
-			// Interface("request_body", requestBody).
+			Interface("request_body", requestBody).
 			Int("status_code", statusCode).
 			// Interface("response_body", responseBodyParsed).
 			Int64("duration_ms", time.Since(startedAt).Milliseconds()).

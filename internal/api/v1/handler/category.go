@@ -1,6 +1,7 @@
 package v1handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +16,7 @@ type GetCategoryByPathParam struct {
 }
 
 type CreateCategoryRequestBody struct {
-	Name string `json:"name" binding:"required"`
+	Name string `form:"name" binding:"required"`
 }
 
 func NewCategoryHandler() *CategoryHandler {
@@ -26,7 +27,10 @@ func (categoryHandler *CategoryHandler) CreateCategory(ctx *gin.Context) {
 
 	var body CreateCategoryRequestBody
 
-	if err := ctx.ShouldBindJSON(&body); err != nil {
+	if err := ctx.ShouldBind(&body); err != nil {
+
+		log.Print("==" + err.Error() + "==")
+
 		ctx.JSON(http.StatusBadRequest, utils.FormatValidationError(err))
 		return
 	}

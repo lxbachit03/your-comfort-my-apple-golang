@@ -1,6 +1,7 @@
 package v1handler
 
 import (
+	"mime/multipart"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,9 +11,9 @@ import (
 type NewHandler struct{}
 
 type CreateNewsRequestBody struct {
-	Title  string `json:"title" binding:"required"`
-	Status *bool  `json:"status" binding:"required"`
-	Image  string `json:"image" binding:"required"`
+	Title  string                `form:"title" binding:"required"`
+	Status *bool                 `form:"status" binding:"required"`
+	Image  *multipart.FileHeader `form:"image" binding:"required"`
 }
 
 func NewNewsHandler() *NewHandler {
@@ -23,8 +24,15 @@ func (newHandler *NewHandler) CreateNews(ctx *gin.Context) {
 
 	var body CreateNewsRequestBody
 
-	if err := ctx.ShouldBindJSON(&body); err != nil {
+	if err := ctx.ShouldBind(&body); err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.FormatValidationError(err))
 		return
 	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"title":      body.Title,
+		"status":     body.Status,
+		"image_name": body.Image.Filename,
+		"image_size": body.Image.Size,
+	})
 }
