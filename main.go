@@ -22,7 +22,10 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(middlewares.RateLimiterMiddleware())
+	r.Use(
+		middlewares.RateLimiterMiddleware(),
+		middlewares.LoggerMiddleware(),
+	)
 
 	go middlewares.CleanUpRateLimiter()
 
