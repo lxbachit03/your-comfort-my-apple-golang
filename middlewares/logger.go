@@ -47,6 +47,13 @@ func LoggerMiddleware() gin.HandlerFunc {
 		logEvent := logger.Info()
 		startedAt := time.Now()
 
+		customLogResponseWriter := &LogResponseWriter{
+			ResponseWriter: ctx.Writer,
+			responseBody:   bytes.NewBufferString(""),
+		}
+		ctx.Writer = customLogResponseWriter
+		requestBody := make(map[string]any)
+
 		ctx.Next()
 
 		statusCode := ctx.Writer.Status()
