@@ -22,7 +22,10 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(middlewares.RateLimiterMiddleware())
+	r.Use(
+		middlewares.LoggerMiddleware(),
+		middlewares.RateLimiterMiddleware(),
+	)
 
 	go middlewares.CleanUpRateLimiter()
 
@@ -31,6 +34,7 @@ func main() {
 		userHandlerV1 := v1handler.NewUserHandler()
 		productHandlerV1 := v1handler.NewProductHandler()
 		categoryHandlerV1 := v1handler.NewCategoryHandler()
+		newHandlerV1 := v1handler.NewNewsHandler()
 
 		userGroup := v1Group.Group("users").Use(middlewares.ApiKeyMiddleware())
 		{
@@ -49,6 +53,12 @@ func main() {
 		categoryGroup := v1Group.Group("categories")
 		{
 			categoryGroup.GET("/:path", categoryHandlerV1.GetCategoryByPath)
+			categoryGroup.POST("/", categoryHandlerV1.CreateCategory)
+		}
+
+		newsGroup := v1Group.Group("news")
+		{
+			newsGroup.POST("/", newHandlerV1.CreateNews)
 		}
 	}
 
