@@ -7,13 +7,12 @@ import (
 	"io"
 	"log"
 	"net/url"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type LogResponseWriter struct {
@@ -29,17 +28,24 @@ func (w *LogResponseWriter) Write(data []byte) (int, error) {
 func LoggerMiddleware() gin.HandlerFunc {
 	logsPath := "logs/http.log"
 
-	if err := os.MkdirAll(filepath.Dir(logsPath), os.ModePerm); err != nil {
-		panic(err)
-	}
+	// if err := os.MkdirAll(filepath.Dir(logsPath), os.ModePerm); err != nil {
+	// 	panic(err)
+	// }
 
-	logFile, err := os.OpenFile(logsPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	// logFile, err := os.OpenFile(logsPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 
-	if err != nil {
-		panic(err)
-	}
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	logger := zerolog.New(logFile).With().Timestamp().Logger()
+	logger := zerolog.New(&lumberjack.Logger{
+		Filename:   logsPath,
+		MaxSize:    1, // megabytes
+		MaxBackups: 7,
+		MaxAge:     30,   // days
+		Compress:   true, // disabled by default
+		LocalTime:  true,
+	}).With().Timestamp().Logger()
 
 	return func(ctx *gin.Context) {
 		requestBody := make(map[string]any)

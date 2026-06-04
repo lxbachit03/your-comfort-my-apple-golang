@@ -23,8 +23,8 @@ func main() {
 	r := gin.Default()
 
 	r.Use(
-		middlewares.RateLimiterMiddleware(),
 		middlewares.LoggerMiddleware(),
+		middlewares.RateLimiterMiddleware(),
 	)
 
 	go middlewares.CleanUpRateLimiter()
