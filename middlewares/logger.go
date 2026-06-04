@@ -16,8 +16,17 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func LoggerMiddleware() gin.HandlerFunc {
+type LogResponseWriter struct {
+	gin.ResponseWriter
+	responseBody *bytes.Buffer
+}
 
+func (w *LogResponseWriter) Write(data []byte) (int, error) {
+	w.responseBody.Write(data)
+	return w.ResponseWriter.Write(data)
+}
+
+func LoggerMiddleware() gin.HandlerFunc {
 	logsPath := "logs/http.log"
 
 	if err := os.MkdirAll(filepath.Dir(logsPath), os.ModePerm); err != nil {
@@ -33,14 +42,13 @@ func LoggerMiddleware() gin.HandlerFunc {
 	logger := zerolog.New(logFile).With().Timestamp().Logger()
 
 	return func(ctx *gin.Context) {
-		logEvent := logger.Info()
-		startedAt := time.Now()
 		requestBody := make(map[string]any)
 		formFiles := []map[string]any{}
 
-		requestContentType := ctx.GetHeader("Content-Type")
+		logEvent := logger.Info()
+		startedAt := time.Now()
 
-		log.Print("requestContentType: ", requestContentType)
+		requestContentType := ctx.GetHeader("Content-Type")
 
 		if strings.HasPrefix(requestContentType, "multipart/form-data") {
 
@@ -98,9 +106,29 @@ func LoggerMiddleware() gin.HandlerFunc {
 
 		}
 
+		customLogResponseWriter := &LogResponseWriter{
+			ResponseWriter: ctx.Writer,
+			responseBody:   bytes.NewBufferString(""),
+		}
+		ctx.Writer = customLogResponseWriter
+
 		ctx.Next()
 
 		statusCode := ctx.Writer.Status()
+		responseContentType := ctx.Writer.Header().Get("Content-Type")
+		rawResBody := customLogResponseWriter.responseBody.String()
+		var responseBodyParsed any
+
+		if strings.HasPrefix(responseContentType, "image/") {
+		} else if strings.HasPrefix(responseContentType, "application/json") ||
+			strings.HasPrefix(strings.TrimSpace(rawResBody), "{") ||
+			strings.HasPrefix(strings.TrimSpace(rawResBody), "[") {
+			if err := json.Unmarshal([]byte(rawResBody), &responseBodyParsed); err != nil {
+				responseBodyParsed = rawResBody
+			}
+		} else {
+			responseBodyParsed = rawResBody
+		}
 
 		if statusCode >= 500 {
 			logEvent = logger.Error()
@@ -125,7 +153,7 @@ func LoggerMiddleware() gin.HandlerFunc {
 			Interface("headers", ctx.Request.Header).
 			Interface("request_body", requestBody).
 			Int("status_code", statusCode).
-			// Interface("response_body", responseBodyParsed).
+			Interface("response_body", responseBodyParsed).
 			Int64("duration_ms", time.Since(startedAt).Milliseconds()).
 			Msg("HTTP Request Log")
 
