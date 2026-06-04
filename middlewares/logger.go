@@ -3,7 +3,6 @@ package middlewares
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"strings"
 	"time"
 
@@ -45,9 +44,6 @@ func LoggerMiddleware() gin.HandlerFunc {
 	}).With().Timestamp().Logger()
 
 	return func(ctx *gin.Context) {
-		requestBody := make(map[string]any)
-		formFiles := []map[string]any{}
-
 		logEvent := logger.Info()
 		startedAt := time.Now()
 
@@ -96,21 +92,5 @@ func LoggerMiddleware() gin.HandlerFunc {
 			Int64("duration_ms", time.Since(startedAt).Milliseconds()).
 			Msg("HTTP Request Log")
 
-	}
-}
-
-func formatByteSize(size int64) string {
-	const (
-		KB = 1 << 10
-		MB = 1 << 20
-	)
-
-	switch {
-	case size >= MB:
-		return fmt.Sprintf("%.2f MB", float64(size)/MB)
-	case size >= KB:
-		return fmt.Sprintf("%.2f KB", float64(size)/KB)
-	default:
-		return fmt.Sprintf("%d B", size)
 	}
 }
