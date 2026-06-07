@@ -2,25 +2,25 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"os"
 
-	"github.com/gin-gonic/gin"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/app"
 )
 
 func main() {
-	r := gin.Default()
 
-	// Define a simple GET endpoint
-	r.GET("/ping", func(c *gin.Context) {
-		// Return JSON response
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+	app, err := app.NewApplication()
+	if err != nil {
+		// log
 
-	// Start server on port 8080 (default)
-	// Server will listen on 0.0.0.0:8080 (localhost:8080 on Windows)
-	if err := r.Run(); err != nil {
-		log.Fatalf("failed to run server: %v", err)
+		log.Printf("Failed to create application: %v", err)
+		os.Exit(1)
+	}
+
+	if err := app.Run(); err != nil {
+		// log
+
+		log.Printf("Failed to run application: %v", err)
+		os.Exit(1)
 	}
 }
