@@ -33,7 +33,11 @@ const TraceIdKey contextKey = "trace_id"
 
 var Log *zerolog.Logger
 
-func NewLogger(config LoggerConfig) {
+func NewApplicationLogger(config LoggerConfig) {
+	Log = NewLogger(config)
+}
+
+func NewLogger(config LoggerConfig) *zerolog.Logger {
 	zerolog.TimeFieldFormat = time.RFC3339
 
 	// lvl, err := zerolog.ParseLevel(config.Level)
@@ -62,7 +66,7 @@ func NewLogger(config LoggerConfig) {
 
 	logger := zerolog.New(writer).With().Timestamp().Logger()
 
-	Log = &logger
+	return &logger
 }
 
 func (w PrettyJSONWriter) Write(p []byte) (n int, err error) {

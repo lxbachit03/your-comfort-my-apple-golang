@@ -30,7 +30,7 @@ func main() {
 
 	// Init Application Logger
 	logPath := path.Join(rootDir, "logs/identity/app.log")
-	logger.NewLogger(logger.LoggerConfig{
+	logger.NewApplicationLogger(logger.LoggerConfig{
 		Level:      "info",
 		Filename:   logPath,
 		MaxSize:    1,
