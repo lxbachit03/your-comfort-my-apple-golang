@@ -1,9 +1,17 @@
 package app
 
 import (
+	"context"
+	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
 	v1handler "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/handlers/v1"
 	route "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes"
 	v1routes "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes/v1"
@@ -46,15 +54,37 @@ func NewApplication() (*Application, error) {
 }
 
 func (app *Application) Run() error {
-
 	server := http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%d", config.AppConfig.Server.Port),
 		Handler: app.r,
 	}
 
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-		return err
+	osSignalChannel := make(chan os.Signal, 1)
+	// syscall.SIGINT -> Ctrl + C
+	// syscall.SIGTERM -> Kill command
+	// syscall.SIGHUP -> Terminal closed
+	signal.Notify(osSignalChannel, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+
+	go func() {
+		log.Printf("🚀 Server is running on port %d", config.AppConfig.Server.Port)
+		if err := server.ListenAndServe(); err != http.ErrServerClosed {
+			log.Println("⛔️ Failed to start server")
+		}
+	}()
+
+	<-osSignalChannel
+	log.Println("⚠️  Shutdown signal received ...")
+
+	// Create a context with a timeout to allow graceful shutdown
+	// Set the timeout duration to 15 seconds
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Println("⛔️ Server forced to shutdown")
 	}
+
+	log.Println("🍺 Server exited gracefully")
 
 	return nil
 }

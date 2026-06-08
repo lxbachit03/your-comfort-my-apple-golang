@@ -39,9 +39,6 @@ func main() {
 		log.Fatalf("❌ Unable to load config: %v", err)
 	}
 
-	log.Print("test:", config.AppConfig.Server.Port)
-	log.Print("test 2:", config.AppConfig.Database.Name)
-
 	app, err := app.NewApplication()
 	if err != nil {
 		log.Fatal("❌ Unable to create application: ", err)
