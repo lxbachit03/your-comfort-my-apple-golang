@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path"
 
 	"github.com/joho/godotenv"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/app"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils"
@@ -28,26 +28,37 @@ func main() {
 	var envFile = fmt.Sprintf(".env.%s", env)
 	var envPath = path.Join(rootDir, envFile)
 
+	// Init Application Logger
+	logPath := path.Join(rootDir, "logs/identity/app.log")
+	logger.NewLogger(logger.LoggerConfig{
+		Level:      "info",
+		Filename:   logPath,
+		MaxSize:    1,
+		MaxBackups: 5,
+		MaxAge:     5,
+		Compress:   true,
+		IsDev:      env,
+	})
+
 	// Load local environment variables
 	if err := godotenv.Load(envPath); err != nil {
-		log.Fatalf("❌ Unable to load env file: %s", err)
+		logger.Log.Warn().Msg("⚠️ Unable to load env file")
+	} else {
+		logger.Log.Info().Msg("✅ Environment variables loaded successfully")
 	}
 
 	// Load config
 	var configPath = path.Join(rootDir, "internal/services/identity/config")
 	if err := config.LoadConfig(configPath, env); err != nil {
-		log.Fatalf("❌ Unable to load config: %v", err)
+		logger.Log.Fatal().Msg("❌ Unable to load config")
 	}
-
-	// Init Application Logger
-	// logPath := path.Join(rootDir, "logs/identity/app.log")
 
 	app, err := app.NewApplication()
 	if err != nil {
-		log.Fatal("❌ Unable to create application: ", err)
+		logger.Log.Fatal().Msg("❌ Unable to create application")
 	}
 
 	if err := app.Run(); err != nil {
-		log.Fatal("❌ Unable to run application: ", err)
+		logger.Log.Fatal().Msg("❌ Unable to run application")
 	}
 }
