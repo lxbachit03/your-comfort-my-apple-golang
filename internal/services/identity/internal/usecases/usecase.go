@@ -1,6 +1,9 @@
 package usecase
 
-import command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands/login_account"
+import (
+	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands/login_account"
+	query "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/queries"
+)
 
 type Usecase struct {
 	Commands Commands
@@ -12,4 +15,6 @@ type Commands struct {
 }
 
 type Queries struct {
+	GetUsersHandler      query.GetUsersHandler
+	GetUserByUUIDHandler query.GetUserByUUIDHandler
 }

@@ -4,30 +4,26 @@ import (
 	"context"
 
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/decorator"
+	v1dto "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/dtos/v1"
 )
 
 type LoginAccountCommand struct {
-	UserName string
+	Email    string
 	Password string
 }
 
-type LoginAccountResult struct {
-	AccessToken  string
-	RefreshToken string
-}
-
-type LoginAccountHandler decorator.CommandHandler[LoginAccountCommand, LoginAccountResult]
+type LoginAccountHandler decorator.CommandHandler[LoginAccountCommand, v1dto.LoginAccountResponse]
 
 type loginAccountHandler struct {
 }
 
 func NewLoginAccountHandler() LoginAccountHandler {
-	return decorator.ApplyCommandDecorators[LoginAccountCommand, LoginAccountResult](
+	return decorator.ApplyCommandDecorators[LoginAccountCommand, v1dto.LoginAccountResponse](
 		loginAccountHandler{},
 	)
 }
 
-func (h loginAccountHandler) Handle(ctx context.Context, cmd LoginAccountCommand) (LoginAccountResult, error) {
+func (h loginAccountHandler) Handle(ctx context.Context, cmd LoginAccountCommand) (v1dto.LoginAccountResponse, error) {
 
-	return LoginAccountResult{}, nil
+	return v1dto.LoginAccountResponse{}, nil
 }

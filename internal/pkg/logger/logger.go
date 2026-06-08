@@ -48,7 +48,7 @@ func NewLogger(config LoggerConfig) *zerolog.Logger {
 
 	var writer io.Writer
 
-	if config.IsDev == "development" {
+	if config.IsDev == "local" {
 		if strings.Contains(config.Filename, "app.log") {
 			writer = zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
 		} else {

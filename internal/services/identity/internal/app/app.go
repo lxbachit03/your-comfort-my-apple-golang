@@ -17,6 +17,7 @@ import (
 	v1routes "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes/v1"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
 	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands/login_account"
+	query "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/queries"
 )
 
 type Application struct {
@@ -34,6 +35,10 @@ func NewApplication() (*Application, error) {
 	usecases := &usecase.Usecase{
 		Commands: usecase.Commands{
 			LoginAccountHandler: command.NewLoginAccountHandler(),
+		},
+		Queries: usecase.Queries{
+			GetUsersHandler:      query.NewGetUsersHandler(),
+			GetUserByUUIDHandler: query.NewGetUserByUUIDHandler(),
 		},
 	}
 

@@ -90,5 +90,6 @@ func shoudLogRateLimit(ip string) bool {
 	}
 
 	rateLimitLogCache.Store(ip, now)
+
 	return true
 }

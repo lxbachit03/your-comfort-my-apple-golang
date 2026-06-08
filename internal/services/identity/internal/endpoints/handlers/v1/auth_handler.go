@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	v1dto "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/dtos/v1"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
 	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands/login_account"
 )
@@ -19,15 +20,15 @@ func NewAuthRouteHandler(uc *usecase.Usecase) *AuthRouteHandler {
 }
 
 func (arh *AuthRouteHandler) LoginAccount(ctx *gin.Context) {
-	// var request v1dto.LoginAccount
-	// if err := ctx.ShouldBindJSON(&input); err != nil {
-	// 	utils.ResponseValidator(ctx, validation.HandleValidationErrors(err))
-	// 	return
-	// }
+	var request v1dto.LoginAccountRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		// utils.ResponseValidator(ctx, validation.HandleValidationErrors(err))
+		return
+	}
 
 	cmd := command.LoginAccountCommand{
-		UserName: "test",
-		Password: "test",
+		Email:    request.Email,
+		Password: request.Password,
 	}
 
 	result, err := arh.uc.Commands.LoginAccountHandler.Handle(ctx.Request.Context(), cmd)
