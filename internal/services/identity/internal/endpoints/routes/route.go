@@ -2,7 +2,7 @@ package route
 
 import (
 	"github.com/gin-gonic/gin"
-	middleware "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/middlewares"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/middleware"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
 )
 
@@ -15,6 +15,7 @@ func RegisterRoutes(r *gin.Engine, uc *usecase.Usecase, routes ...Route) {
 	// middlewares
 	r.Use(
 		middleware.ApiKeyMiddleware(),
+		middleware.CORSMiddleware(),
 	)
 
 	v1ApiGroup := r.Group("/api/v1")
