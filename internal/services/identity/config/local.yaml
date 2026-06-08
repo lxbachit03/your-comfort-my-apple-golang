@@ -1,0 +1,16 @@
+server:
+  port: 8080
+database:
+  name: "[IDENTITY_DB_NAME]"
+  database: "[IDENTITY_DB_NAME]"
+  host: "[IDENTITY_DB_HOST]"
+  port: "[IDENTITY_DB_PORT]"
+  user: "[IDENTITY_DB_USERNAME]"
+  password: "[IDENTITY_DB_PASSWORD]"
+  ssl_mode: "[IDENTITY_DB_SSL_MODE]"
+security:
+  jwt:
+    access_secret: "[IDENTITY_JWT_ACCESS_SECRET]"
+    refresh_secret: "[IDENTITY_JWT_REFRESH_SECRET]"
+    access_ttl: "[IDENTITY_JWT_ACCESS_TTL]"
+    refresh_ttl: "[IDENTITY_JWT_REFRESH_TTL]"
