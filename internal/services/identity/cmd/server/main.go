@@ -39,6 +39,9 @@ func main() {
 		log.Fatalf("❌ Unable to load config: %v", err)
 	}
 
+	// Init Application Logger
+	// logPath := path.Join(rootDir, "logs/identity/app.log")
+
 	app, err := app.NewApplication()
 	if err != nil {
 		log.Fatal("❌ Unable to create application: ", err)
