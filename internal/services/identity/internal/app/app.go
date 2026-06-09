@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
+	validator "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/validator"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
 	v1handler "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/handlers/v1"
 	route "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes"
@@ -25,6 +26,12 @@ type Application struct {
 }
 
 func NewApplication() (*Application, error) {
+	if _, err := validator.InitValidator(); err != nil {
+		logger.Log.Fatal().Err(err).Msg("❌ Validator init failed")
+		return nil, err
+	} else {
+		// identity_validator.(v)
+	}
 
 	r := gin.Default()
 

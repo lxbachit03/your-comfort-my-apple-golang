@@ -4,12 +4,20 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	errorcode "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/error_code"
 )
 
 type ApiResponse[T any] struct {
 	StatusCode int    `json:"status_code"`
 	Message    string `json:"message"`
 	Data       T      `json:"data"`
+}
+
+type ValidationErrorResponse struct {
+	StatusCode   int                 `json:"status_code"`
+	ErrorCode    errorcode.ErrorCode `json:"error_code"`
+	Message      string              `json:"message"`
+	ErrorDetails any                 `json:"error_details"`
 }
 
 type PaginationData[T any] struct {
@@ -32,20 +40,9 @@ type Pagination struct {
 	HasPrev      bool  `json:"has_prev"`
 }
 
-type ErrorCode string
-
-const (
-	ErrInternalServer      ErrorCode = "INTERNAL_SERVER_ERROR"
-	ErrCodeBadRequest      ErrorCode = "BAD_REQUEST"
-	ErrCodeNotFound        ErrorCode = "NOT_FOUND"
-	ErrCodeUnauthorized    ErrorCode = "UNAUTHORIZED"
-	ErrCodeForbidden       ErrorCode = "FORBIDDEN"
-	ErrCodeTooManyRequests ErrorCode = "TOO_MANY_REQUESTS"
-)
-
 type ApiError struct {
 	StatusCode   int
-	ErrorCode    ErrorCode
+	ErrorCode    errorcode.ErrorCode
 	ErrorDetails error
 }
 
@@ -73,7 +70,7 @@ func ErrorResponse(ctx *gin.Context, err error) {
 		status := httpStatusFromCode(apiError.ErrorCode)
 
 		response := gin.H{
-			"status_code": 200,
+			"status_code": http.StatusOK,
 			"error_code":  apiError.ErrorCode,
 		}
 
@@ -87,7 +84,7 @@ func ErrorResponse(ctx *gin.Context, err error) {
 
 	ctx.JSON(http.StatusInternalServerError, gin.H{
 		"error": err.Error(),
-		"code":  ErrInternalServer,
+		"code":  errorcode.ErrInternalServer,
 	})
 
 	// return &ApiError{
@@ -96,15 +93,19 @@ func ErrorResponse(ctx *gin.Context, err error) {
 	// }
 }
 
-func httpStatusFromCode(code ErrorCode) int {
+func ValidationErrorResp(ctx *gin.Context, validation ValidationErrorResponse) {
+	ctx.JSON(http.StatusBadRequest, validation)
+}
+
+func httpStatusFromCode(code errorcode.ErrorCode) int {
 	switch code {
-	case ErrCodeBadRequest:
+	case errorcode.ErrCodeBadRequest:
 		return http.StatusBadRequest
-	case ErrCodeNotFound:
+	case errorcode.ErrCodeNotFound:
 		return http.StatusNotFound
-	case ErrCodeUnauthorized:
+	case errorcode.ErrCodeUnauthorized:
 		return http.StatusUnauthorized
-	case ErrCodeTooManyRequests:
+	case errorcode.ErrCodeTooManyRequests:
 		return http.StatusTooManyRequests
 	default:
 		return http.StatusInternalServerError

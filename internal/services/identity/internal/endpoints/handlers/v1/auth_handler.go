@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	apiresponse "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/api-response"
 	v1dto "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/dtos/v1"
+	identity_validator "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils/validation"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
 	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands/login_account"
 )
@@ -22,7 +24,7 @@ func NewAuthRouteHandler(uc *usecase.Usecase) *AuthRouteHandler {
 func (arh *AuthRouteHandler) LoginAccount(ctx *gin.Context) {
 	var request v1dto.LoginAccountRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		// utils.ResponseValidator(ctx, validation.HandleValidationErrors(err))
+		apiresponse.ValidationErrorResp(ctx, identity_validator.HandleValidationError(err))
 		return
 	}
 
