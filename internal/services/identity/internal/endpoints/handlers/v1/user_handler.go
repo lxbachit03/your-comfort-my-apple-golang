@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	apiresponse "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/api-response"
 	v1dto "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/dtos/v1"
+	identity_validator "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils/validation"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
 	query "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/queries"
 )
@@ -23,7 +24,7 @@ func NewUserRouteHandler(uc *usecase.Usecase) *UserRouteHandler {
 func (arh *UserRouteHandler) GetUsers(ctx *gin.Context) {
 	var request v1dto.GetUsersParams
 	if err := ctx.ShouldBindQuery(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apiresponse.ValidationErrorResp(ctx, identity_validator.HandleValidationError(err))
 		return
 	}
 

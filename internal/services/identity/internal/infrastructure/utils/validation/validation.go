@@ -36,10 +36,25 @@ func HandleValidationError(err error) apiresponse.ValidationErrorResponse {
 			switch e.Tag() {
 			case "required":
 				errors[fieldPath] = fmt.Sprintf("%s is required", fieldPath)
+			case "gt":
+				errors[fieldPath] = fmt.Sprintf("%s must be greater than %s", fieldPath, e.Param())
+			case "lt":
+				errors[fieldPath] = fmt.Sprintf("%s must be less than %s", fieldPath, e.Param())
+			case "gte":
+				errors[fieldPath] = fmt.Sprintf("%s must be greater than or equal to %s", fieldPath, e.Param())
+			case "lte":
+				errors[fieldPath] = fmt.Sprintf("%s must be less than or equal to %s", fieldPath, e.Param())
+			case "oneof":
+				allowedValues := strings.Join(strings.Split(e.Param(), " "), ",")
+				errors[fieldPath] = fmt.Sprintf("%s must be one of: %s", fieldPath, allowedValues)
 			case "min":
 				errors[fieldPath] = fmt.Sprintf("%s must be at least %s characters long", fieldPath, e.Param())
 			case "max":
 				errors[fieldPath] = fmt.Sprintf("%s must be at most %s characters long", fieldPath, e.Param())
+			case "min_int":
+				errors[fieldPath] = fmt.Sprintf("%s must be at least %s", fieldPath, e.Param())
+			case "max_int":
+				errors[fieldPath] = fmt.Sprintf("%s must be at most %s", fieldPath, e.Param())
 			case "email":
 				errors[fieldPath] = fmt.Sprintf("%s must be a valid email address", fieldPath)
 			case "uuid":
