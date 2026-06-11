@@ -1,16 +1,12 @@
 package v1handler
 
 import (
-	"fmt"
-	"log"
 	"net/http"
-	"path/filepath"
-	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	apiresponse "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/api-response"
 	v1dto "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/dtos/v1"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils"
 	identity_validator "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils/validation"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
 	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/commands"
@@ -109,67 +105,30 @@ func (arh *UserRouteHandler) UpdateProfile(ctx *gin.Context) {
 
 	profileImage, err := ctx.FormFile("profile_image")
 
-	if profileImage != nil {
-		// validate file name
-		var allowExts = map[string]bool{
+	if err == nil && profileImage != nil {
+		// 1. Validate file
+		allowedExts := map[string]bool{
 			".jpg":  true,
 			".jpeg": true,
 			".png":  true,
 		}
-
-		log.Printf("profileImage.Filename %s", profileImage.Filename)
-
-		ext := strings.ToLower(filepath.Ext(profileImage.Filename))
-		if !allowExts[ext] {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "unsupported file extension"})
-			return
-		}
-
-		// check file size (5MB)
-		// 1 << 20 = 1 * 2^20 = 1 * 1048576 = 1MB
-		// 5 << 20 = 5 * 2^20 = 5 * 1048576 = 5MB
-		if profileImage.Size > 5<<20 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "File too large (5 MB)"})
-			return
-		}
-
-		// check file type
-		var allowMimeTypes = map[string]bool{
+		allowedMimeTypes := map[string]bool{
 			"image/jpeg": true,
 			"image/png":  true,
 		}
-		file, err := profileImage.Open()
+
+		if err := utils.ValidateUploadedFile(profileImage, allowedExts, 5<<20, allowedMimeTypes); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// 2. Save file with a random UUID name
+		savedPath, err := utils.SaveUploadedFileWithRandomName(profileImage, "uploads/profile-images")
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "cannot open file"})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		defer file.Close()
-
-		buffer := make([]byte, 512)
-		_, err = file.Read(buffer)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "cannot read file"})
-			return
-		}
-
-		mimeType := http.DetectContentType(buffer)
-		if !allowMimeTypes[mimeType] {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid MIME type"})
-			return
-		}
-
-		// Change filename (UUID).jpg
-		filename := fmt.Sprintf("%s%s", uuid.New().String(), ext)
-
-		// save file
-		saveDir := "uploads/profile-images/"
-		// dest := path.Join(utils.GetWorkingDir(), saveDir, filename)
-		// if err := os.MkdirAll(saveDir, 0755); err != nil {
-		// 	ctx.JSON(http.StatusBadRequest, gin.H{"error": "failed to create directory"})
-		// 	return
-		// }
-
-		profileImageUrl = saveDir + filename
+		profileImageUrl = savedPath
 	}
 
 	cmd := command.UpdateProfileCommand{
@@ -197,4 +156,78 @@ func (arh *UserRouteHandler) UpdateProfile(ctx *gin.Context) {
 	}
 
 	apiresponse.Response(ctx, http.StatusOK, messsage, result)
+}
+
+func (arh *UserRouteHandler) UploadMultipleFiles(ctx *gin.Context) {
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid multipart form"})
+		return
+	}
+
+	images := form.File["images"]
+
+	if len(images) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "No file provided"})
+		return
+	}
+
+	// 1. Limit max files to 5 to prevent DoS
+	const maxFiles = 5
+	if len(images) > maxFiles {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Too many files, maximum is 5"})
+		return
+	}
+
+	var successFiles []string
+	var failedFiles []map[string]string
+
+	allowedExts := map[string]bool{
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+	}
+	allowedMimeTypes := map[string]bool{
+		"image/jpeg": true,
+		"image/png":  true,
+	}
+
+	for _, image := range images {
+
+		// 1. validate
+		if err := utils.ValidateUploadedFile(image, allowedExts, 5<<20, allowedMimeTypes); err != nil {
+			failedFiles = append(failedFiles, map[string]string{
+				"filename": image.Filename,
+				"error":    err.Error(),
+			})
+
+			continue
+		}
+
+		// 2. save file
+		savedPath, err := utils.SaveUploadedFileWithRandomName(image, "uploads/profile-images")
+		if err != nil {
+			failedFiles = append(failedFiles, map[string]string{
+				"filename": image.Filename,
+				"error":    err.Error(),
+			})
+			continue
+		}
+
+		successFiles = append(successFiles, savedPath)
+	}
+
+	// 2. If at least 1 file upload failed, return HTTP 400 Bad Request
+	if len(failedFiles) > 0 {
+		apiresponse.Response(ctx, http.StatusBadRequest, "Some or all file uploads failed", map[string]any{
+			"success": successFiles,
+			"failed":  failedFiles,
+		})
+		return
+	}
+
+	apiresponse.Response(ctx, http.StatusOK, "Files uploaded successfully", map[string]any{
+		"success": successFiles,
+		"failed":  failedFiles,
+	})
 }
