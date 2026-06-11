@@ -24,7 +24,7 @@ func NewUserRouteHandler(uc *usecase.Usecase) *UserRouteHandler {
 }
 
 func (arh *UserRouteHandler) GetUsers(ctx *gin.Context) {
-	var request v1dto.GetUsersParams
+	var request v1dto.GetUsersRequest
 	if err := ctx.ShouldBindQuery(&request); err != nil {
 		apiresponse.ValidationErrorResp(ctx, identity_validator.HandleValidationError(err))
 		return
@@ -48,14 +48,14 @@ func (arh *UserRouteHandler) GetUsers(ctx *gin.Context) {
 }
 
 func (arh *UserRouteHandler) GetUserByUUID(ctx *gin.Context) {
-	uuid := ctx.Param("uuid")
-	if uuid == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "uuid is required"})
+	var request v1dto.GetUserByUUIDRequest
+	if err := ctx.ShouldBindUri(&request); err != nil {
+		apiresponse.ValidationErrorResp(ctx, identity_validator.HandleValidationError(err))
 		return
 	}
 
 	query := query.GetUserByUUIDQuery{
-		UUID: uuid,
+		UUID: request.UUID,
 	}
 
 	result, err := arh.uc.Queries.GetUserByUUIDHandler.Handle(ctx.Request.Context(), query)
