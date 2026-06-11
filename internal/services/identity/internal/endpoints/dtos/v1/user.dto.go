@@ -33,6 +33,14 @@ type AddAddressRequest struct {
 	AddressCountry            string `json:"address_country" binding:"required"`
 }
 
+type UpdateProfileRequest struct {
+	FirstName   string `form:"first_name" binding:"omitempty"`
+	LastName    string `form:"last_name" binding:"omitempty"`
+	PhoneNumber string `form:"phone_number" binding:"omitempty"`
+	BirthDay    string `form:"birth_day" binding:"omitempty"`
+	Gender      string `form:"gender" binding:"omitempty"`
+}
+
 func MapUserToDTO(user any) *UserDTO {
 	return &UserDTO{
 		UUID:  "test",

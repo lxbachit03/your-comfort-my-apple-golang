@@ -19,6 +19,7 @@ import (
 	identity_validator "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils/validation"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
 	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands"
+	usersCommand "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/commands"
 	query "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/queries"
 )
 
@@ -42,7 +43,9 @@ func NewApplication() (*Application, error) {
 
 	usecases := &usecase.Usecase{
 		Commands: usecase.Commands{
-			LoginAccountHandler: command.NewLoginAccountHandler(),
+			LoginAccountHandler:  command.NewLoginAccountHandler(),
+			AddAddressHandler:    usersCommand.NewAddAddressHandler(),
+			UpdateProfileHandler: usersCommand.NewUpdateProfileHandler(),
 		},
 		Queries: usecase.Queries{
 			GetUsersHandler:      query.NewGetUsersHandler(),
