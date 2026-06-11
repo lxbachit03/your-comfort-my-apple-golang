@@ -1,8 +1,9 @@
 package usecase
 
 import (
-	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands/login_account"
-	query "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/queries"
+	authCommand "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands"
+	userCommand "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/commands"
+	userQuery "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/queries"
 )
 
 type Usecase struct {
@@ -11,10 +12,11 @@ type Usecase struct {
 }
 
 type Commands struct {
-	LoginAccountHandler command.LoginAccountHandler
+	LoginAccountHandler authCommand.LoginAccountHandler
+	AddAddressHandler   userCommand.AddAddressHandler
 }
 
 type Queries struct {
-	GetUsersHandler      query.GetUsersHandler
-	GetUserByUUIDHandler query.GetUserByUUIDHandler
+	GetUsersHandler      userQuery.GetUsersHandler
+	GetUserByUUIDHandler userQuery.GetUserByUUIDHandler
 }

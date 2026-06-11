@@ -23,6 +23,16 @@ type Pagination[T any] struct {
 	HasPrev      bool  `json:"has_prev"`
 }
 
+type AddAddressRequest struct {
+	AddressLabel              string `json:"address_label" binding:"required"`
+	AddressContactName        string `json:"address_contact_name" binding:"required"`
+	AddressContactPhoneNumber string `json:"address_contact_phone_number" binding:"required"`
+	AddressAddressLine        string `json:"address_address_line" binding:"required"`
+	AddressDistrict           string `json:"address_district" binding:"required"`
+	AddressProvince           string `json:"address_province" binding:"required"`
+	AddressCountry            string `json:"address_country" binding:"required"`
+}
+
 func MapUserToDTO(user any) *UserDTO {
 	return &UserDTO{
 		UUID:  "test",

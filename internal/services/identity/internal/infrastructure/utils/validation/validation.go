@@ -2,6 +2,7 @@ package identity_validator
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -20,8 +21,11 @@ func HandleValidationError(err error) apiresponse.ValidationErrorResponse {
 			rawPath := strings.TrimPrefix(e.Namespace(), root+".") // Email
 			parts := strings.Split(rawPath, ".")                   // [Email]
 
+			log.Printf("parts: %v", parts)
+
 			for i, part := range parts {
-				if strings.Contains("part", "[") {
+				log.Printf("part: %v", part)
+				if strings.Contains(part, "[") {
 					// idx := strings.Index(part, "[")
 					// base := utils.CamelToSnake(part[:idx])
 					// index := part[idx:]
@@ -33,32 +37,34 @@ func HandleValidationError(err error) apiresponse.ValidationErrorResponse {
 
 			fieldPath := strings.Join(parts, ".")
 
+			log.Printf("fieldPath: %v", fieldPath)
+
 			switch e.Tag() {
 			case "required":
-				errors[fieldPath] = fmt.Sprintf("%s is required", fieldPath)
+				errors[fieldPath] = "Is required"
 			case "gt":
-				errors[fieldPath] = fmt.Sprintf("%s must be greater than %s", fieldPath, e.Param())
+				errors[fieldPath] = fmt.Sprintf("Must be greater than %s", e.Param())
 			case "lt":
-				errors[fieldPath] = fmt.Sprintf("%s must be less than %s", fieldPath, e.Param())
+				errors[fieldPath] = fmt.Sprintf("Must be less than %s", e.Param())
 			case "gte":
-				errors[fieldPath] = fmt.Sprintf("%s must be greater than or equal to %s", fieldPath, e.Param())
+				errors[fieldPath] = fmt.Sprintf("Must be greater than or equal to %s", e.Param())
 			case "lte":
-				errors[fieldPath] = fmt.Sprintf("%s must be less than or equal to %s", fieldPath, e.Param())
+				errors[fieldPath] = fmt.Sprintf("Must be less than or equal to %s", e.Param())
 			case "oneof":
 				allowedValues := strings.Join(strings.Split(e.Param(), " "), ",")
-				errors[fieldPath] = fmt.Sprintf("%s must be one of: %s", fieldPath, allowedValues)
+				errors[fieldPath] = fmt.Sprintf("Must be one of: %s", allowedValues)
 			case "min":
-				errors[fieldPath] = fmt.Sprintf("%s must be at least %s characters long", fieldPath, e.Param())
+				errors[fieldPath] = fmt.Sprintf("Must be at least %s characters long", e.Param())
 			case "max":
-				errors[fieldPath] = fmt.Sprintf("%s must be at most %s characters long", fieldPath, e.Param())
+				errors[fieldPath] = fmt.Sprintf("Must be at most %s characters long", e.Param())
 			case "min_int":
-				errors[fieldPath] = fmt.Sprintf("%s must be at least %s", fieldPath, e.Param())
+				errors[fieldPath] = fmt.Sprintf("Must be at least %s", e.Param())
 			case "max_int":
-				errors[fieldPath] = fmt.Sprintf("%s must be at most %s", fieldPath, e.Param())
+				errors[fieldPath] = fmt.Sprintf("Must be at most %s", e.Param())
 			case "email":
-				errors[fieldPath] = fmt.Sprintf("%s must be a valid email address", fieldPath)
+				errors[fieldPath] = "Must be a valid email address"
 			case "uuid":
-				errors[fieldPath] = fmt.Sprintf("%s must be a valid UUID", fieldPath)
+				errors[fieldPath] = "Must be a valid UUID"
 			}
 		}
 

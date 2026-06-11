@@ -8,7 +8,7 @@ import (
 	v1dto "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/dtos/v1"
 	identity_validator "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils/validation"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
-	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands/login_account"
+	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands"
 )
 
 type AuthRouteHandler struct {

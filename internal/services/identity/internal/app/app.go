@@ -18,7 +18,7 @@ import (
 	v1routes "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes/v1"
 	identity_validator "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils/validation"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
-	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands/login_account"
+	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands"
 	query "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/queries"
 )
 

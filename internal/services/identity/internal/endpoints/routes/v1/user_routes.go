@@ -20,5 +20,6 @@ func (ur *userRoutes) Register(r *gin.RouterGroup) {
 	{
 		users.GET("", ur.handler.GetUsers)
 		users.GET("/:uuid", ur.handler.GetUserByUUID)
+		users.POST("/address", ur.handler.AddAddress)
 	}
 }
