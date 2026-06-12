@@ -19,7 +19,7 @@ type Route interface {
 
 func RegisterRoutes(r *gin.Engine, uc *usecase.Usecase, routes ...Route) {
 
-	rateLimterLogger, recoveryLogger := initLoggers()
+	rateLimterLogger, recoveryLogger, httpLogger := initLoggers()
 
 	// middlewares
 
@@ -27,7 +27,7 @@ func RegisterRoutes(r *gin.Engine, uc *usecase.Usecase, routes ...Route) {
 	r.Use(
 		middleware.CORSMiddleware(),
 		middleware.RateLimiterMiddleware(rateLimterLogger),
-		// middleware.HttpLoggerMiddleware
+		middleware.HttpLoggerMiddleware(httpLogger),
 		middleware.RecoveryMiddleware(recoveryLogger),
 		// middleware.ApiKeyMiddleware(),
 		// AuthMiddleware
@@ -40,11 +40,12 @@ func RegisterRoutes(r *gin.Engine, uc *usecase.Usecase, routes ...Route) {
 	}
 }
 
-func initLoggers() (*zerolog.Logger, *zerolog.Logger) {
+func initLoggers() (*zerolog.Logger, *zerolog.Logger, *zerolog.Logger) {
 	rootDir := utils.GetWorkingDir()
 
 	rateLimiterPath := path.Join(rootDir, "logs/identity/rate_limiter.log")
 	recoveryLoggerPath := path.Join(rootDir, "logs/identity/recovery.log")
+	httpLoggerPath := path.Join(rootDir, "logs/identity/http.log")
 
 	rateLimterLogger := logger.NewLogger(logger.LoggerConfig{
 		Level:      "warning",
@@ -66,5 +67,15 @@ func initLoggers() (*zerolog.Logger, *zerolog.Logger) {
 		AppEnv:     config.AppConfig.Server.AppEnv,
 	})
 
-	return rateLimterLogger, recoveryLogger
+	httpLogger := logger.NewLogger(logger.LoggerConfig{
+		Level:      "info",
+		Filename:   httpLoggerPath,
+		MaxSize:    1,
+		MaxBackups: 5,
+		MaxAge:     5,
+		Compress:   true,
+		AppEnv:     config.AppConfig.Server.AppEnv,
+	})
+
+	return rateLimterLogger, recoveryLogger, httpLogger
 }

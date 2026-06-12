@@ -21,8 +21,6 @@ func HandleValidationError(err error) apiresponse.ValidationErrorResponse {
 			rawPath := strings.TrimPrefix(e.Namespace(), root+".") // Email
 			parts := strings.Split(rawPath, ".")                   // [Email]
 
-			log.Printf("parts: %v", parts)
-
 			for i, part := range parts {
 				log.Printf("part: %v", part)
 				if strings.Contains(part, "[") {
@@ -36,8 +34,6 @@ func HandleValidationError(err error) apiresponse.ValidationErrorResponse {
 			}
 
 			fieldPath := strings.Join(parts, ".")
-
-			log.Printf("fieldPath: %v", fieldPath)
 
 			switch e.Tag() {
 			case "required":
