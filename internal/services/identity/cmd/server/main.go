@@ -37,7 +37,7 @@ func main() {
 		MaxBackups: 5,
 		MaxAge:     5,
 		Compress:   true,
-		IsDev:      env,
+		AppEnv:     env,
 	})
 
 	// Load local environment variables

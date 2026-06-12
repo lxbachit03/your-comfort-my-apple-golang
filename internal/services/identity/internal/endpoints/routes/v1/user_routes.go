@@ -22,5 +22,8 @@ func (ur *userRoutes) Register(r *gin.RouterGroup) {
 		users.GET("/:uuid", ur.handler.GetUserByUUID)
 		users.POST("/address", ur.handler.AddAddress)
 		users.PUT("/profiles/:profile_id", ur.handler.UpdateProfile)
+		users.GET("/panic-test", func(ctx *gin.Context) {
+			panic("oh no")
+		})
 	}
 }

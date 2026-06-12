@@ -1,5 +1,6 @@
 server:
   port: 8080
+  app_env: "[APP_ENV]"
 database:
   name: "[IDENTITY_POSTGRES_DB_NAME]"
   database: "[IDENTITY_POSTGRES_DB_NAME]"

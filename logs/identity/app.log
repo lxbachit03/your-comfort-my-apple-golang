@@ -1,5 +1,0 @@
-{"level":"info","time":"2026-06-08T17:15:24+07:00","message":"✅ Environment variables loaded successfully"}
-{"level":"info","time":"2026-06-08T17:19:13+07:00","message":"✅ Environment variables loaded successfully"}
-{"level":"info","time":"2026-06-08T17:19:13+07:00","message":"🚀 Server is running on port 8080"}
-{"level":"warn","time":"2026-06-08T17:40:32+07:00","message":"⚠️  Shutdown signal received ..."}
-{"level":"info","time":"2026-06-08T17:40:32+07:00","message":"🍺 Server exited gracefully"}

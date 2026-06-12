@@ -5,7 +5,8 @@ import (
 )
 
 type ServerConfig struct {
-	Port int `mapstructure:"port"`
+	AppEnv string `mapstructure:"app_env"`
+	Port   int    `mapstructure:"port"`
 }
 
 type DatabaseConfig struct {
@@ -69,6 +70,9 @@ func LoadConfig(configPath string, env string) error {
 	}
 
 	// Bind Custom Environment Variables to Config keys
+	viper.BindEnv("server.app_env", "APP_ENV")
+	viper.BindEnv("server.port", "PORT")
+
 	viper.BindEnv("database.name", "IDENTITY_POSTGRES_DB_NAME")
 	viper.BindEnv("database.database", "IDENTITY_POSTGRES_DB_NAME")
 	viper.BindEnv("database.host", "IDENTITY_POSTGRES_DB_HOST")

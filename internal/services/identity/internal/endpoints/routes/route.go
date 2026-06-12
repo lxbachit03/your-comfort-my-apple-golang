@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/middleware"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
 	"github.com/rs/zerolog"
@@ -18,16 +19,19 @@ type Route interface {
 
 func RegisterRoutes(r *gin.Engine, uc *usecase.Usecase, routes ...Route) {
 
-	var rateLimterLogger = initLoggers()
+	rateLimterLogger, recoveryLogger := initLoggers()
 
 	// middlewares
 
-	r.Use(
-		middleware.RateLimiterMiddleware(rateLimterLogger),
-		// middleware.ApiKeyMiddleware(),
-		middleware.CORSMiddleware(),
-	)
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	r.Use(
+		middleware.CORSMiddleware(),
+		middleware.RateLimiterMiddleware(rateLimterLogger),
+		// middleware.HttpLoggerMiddleware
+		middleware.RecoveryMiddleware(recoveryLogger),
+		// middleware.ApiKeyMiddleware(),
+		// AuthMiddleware
+	)
 
 	v1ApiGroup := r.Group("/api/v1")
 
@@ -36,10 +40,11 @@ func RegisterRoutes(r *gin.Engine, uc *usecase.Usecase, routes ...Route) {
 	}
 }
 
-func initLoggers() (ratelimiterLogger *zerolog.Logger) {
+func initLoggers() (*zerolog.Logger, *zerolog.Logger) {
 	rootDir := utils.GetWorkingDir()
 
 	rateLimiterPath := path.Join(rootDir, "logs/identity/rate_limiter.log")
+	recoveryLoggerPath := path.Join(rootDir, "logs/identity/recovery.log")
 
 	rateLimterLogger := logger.NewLogger(logger.LoggerConfig{
 		Level:      "warning",
@@ -48,8 +53,18 @@ func initLoggers() (ratelimiterLogger *zerolog.Logger) {
 		MaxBackups: 5,
 		MaxAge:     5,
 		Compress:   true,
-		IsDev:      "local",
+		AppEnv:     config.AppConfig.Server.AppEnv,
 	})
 
-	return rateLimterLogger
+	recoveryLogger := logger.NewLogger(logger.LoggerConfig{
+		Level:      "error",
+		Filename:   recoveryLoggerPath,
+		MaxSize:    1,
+		MaxBackups: 5,
+		MaxAge:     5,
+		Compress:   true,
+		AppEnv:     config.AppConfig.Server.AppEnv,
+	})
+
+	return rateLimterLogger, recoveryLogger
 }
