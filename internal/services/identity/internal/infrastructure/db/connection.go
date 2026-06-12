@@ -8,9 +8,10 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/db/sqlc"
 )
 
-// var DB sqlc.Querier
+var DB sqlc.Querier
 var DBPool *pgxpool.Pool
 
 func InitDB() error {
@@ -41,7 +42,8 @@ func InitDB() error {
 		return fmt.Errorf("error creating DB pool: %v", err)
 	}
 
-	// DB = sqlc.New(DBPool)
+	// Init sqlc
+	DB = sqlc.New(DBPool)
 
 	if err := DBPool.Ping(ctx); err != nil {
 		return fmt.Errorf("db ping error: %v", err)
