@@ -16,6 +16,7 @@ import (
 	v1handler "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/handlers/v1"
 	route "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes"
 	v1routes "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes/v1"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/db"
 	identity_validator "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils/validation"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
 	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands"
@@ -36,6 +37,10 @@ func NewApplication() (*Application, error) {
 	}
 
 	r := gin.Default()
+
+	if err := db.InitDB(); err != nil {
+		logger.Log.Fatal().Err(err).Msg("Database init failed")
+	}
 
 	// init dependencies
 	// logger

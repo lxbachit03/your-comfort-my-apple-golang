@@ -69,13 +69,13 @@ func LoadConfig(configPath string, env string) error {
 	}
 
 	// Bind Custom Environment Variables to Config keys
-	viper.BindEnv("database.name", "IDENTITY_DB_NAME")
-	viper.BindEnv("database.database", "IDENTITY_DB_NAME")
-	viper.BindEnv("database.host", "IDENTITY_DB_HOST")
-	viper.BindEnv("database.port", "IDENTITY_DB_PORT")
-	viper.BindEnv("database.user", "IDENTITY_DB_USERNAME")
-	viper.BindEnv("database.password", "IDENTITY_DB_PASSWORD")
-	viper.BindEnv("database.ssl_mode", "IDENTITY_DB_SSL_MODE")
+	viper.BindEnv("database.name", "IDENTITY_POSTGRES_DB_NAME")
+	viper.BindEnv("database.database", "IDENTITY_POSTGRES_DB_NAME")
+	viper.BindEnv("database.host", "IDENTITY_POSTGRES_DB_HOST")
+	viper.BindEnv("database.port", "IDENTITY_POSTGRES_DB_PORT")
+	viper.BindEnv("database.user", "IDENTITY_POSTGRES_DB_USER")
+	viper.BindEnv("database.password", "IDENTITY_POSTGRES_DB_PASSWORD")
+	viper.BindEnv("database.ssl_mode", "IDENTITY_POSTGRES_DB_SSL_MODE")
 
 	viper.BindEnv("security.jwt.access_secret", "IDENTITY_JWT_ACCESS_SECRET")
 	viper.BindEnv("security.jwt.refresh_secret", "IDENTITY_JWT_REFRESH_SECRET")
