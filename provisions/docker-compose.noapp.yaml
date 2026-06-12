@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  ygz.identity.postgres:
+    image: postgres:18.4-alpine3.23
+    container_name: ygz.identity.postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${IDENTITY_POSTGRES_DB_NAME}
+      POSTGRES_USER: ${IDENTITY_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${IDENTITY_POSTGRES_DB_PASSWORD}
+    ports:
+      - "${IDENTITY_POSTGRES_DB_PORT}:5432"
+    volumes:
+      - ygz-identity-postgres:/var/lib/postgresql
+    networks:
+      - ygz-app-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${IDENTITY_POSTGRES_USER} -d ${IDENTITY_POSTGRES_DB}",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  ygz-identity-postgres:
+
+networks:
+  ygz-app-network:
+    driver: bridge
