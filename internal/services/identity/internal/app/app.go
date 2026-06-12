@@ -17,6 +17,7 @@ import (
 	route "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes"
 	v1routes "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes/v1"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/db"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/db/repository"
 	identity_validator "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils/validation"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
 	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands"
@@ -45,6 +46,7 @@ func NewApplication() (*Application, error) {
 	// init dependencies
 	// logger
 	// database
+	userRepository := repository.NewUserRepository(db.DB)
 
 	usecases := &usecase.Usecase{
 		Commands: usecase.Commands{
@@ -54,7 +56,7 @@ func NewApplication() (*Application, error) {
 		},
 		Queries: usecase.Queries{
 			GetUsersHandler:      query.NewGetUsersHandler(),
-			GetUserByUUIDHandler: query.NewGetUserByUUIDHandler(),
+			GetUserByUUIDHandler: query.NewGetUserByUUIDHandler(userRepository),
 		},
 	}
 

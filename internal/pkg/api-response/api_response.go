@@ -43,6 +43,7 @@ type Pagination struct {
 type ApiError struct {
 	StatusCode   int
 	ErrorCode    errorcode.ErrorCode
+	Message      string
 	ErrorDetails error
 }
 
@@ -70,8 +71,12 @@ func ErrorResponse(ctx *gin.Context, err error) {
 		status := httpStatusFromCode(apiError.ErrorCode)
 
 		response := gin.H{
-			"status_code": http.StatusOK,
+			"status_code": status,
 			"error_code":  apiError.ErrorCode,
+		}
+
+		if apiError.Message != "" {
+			response["message"] = apiError.Message
 		}
 
 		if apiError.ErrorDetails != nil {
