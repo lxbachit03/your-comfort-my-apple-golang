@@ -2,7 +2,6 @@ package identity_validator
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -22,7 +21,6 @@ func HandleValidationError(err error) apiresponse.ValidationErrorResponse {
 			parts := strings.Split(rawPath, ".")                   // [Email]
 
 			for i, part := range parts {
-				log.Printf("part: %v", part)
 				if strings.Contains(part, "[") {
 					// idx := strings.Index(part, "[")
 					// base := utils.CamelToSnake(part[:idx])

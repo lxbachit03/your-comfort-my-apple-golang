@@ -3,12 +3,16 @@ package db
 import (
 	"context"
 	"fmt"
-	"log"
+	"path"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/tracelog"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/pgx"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/db/sqlc"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils"
 )
 
 var DB sqlc.Querier
@@ -28,6 +32,28 @@ func InitDB() error {
 		return fmt.Errorf("error parsing DB config: %v", err)
 	}
 
+	// Init SQL logger
+	rootDir := utils.GetWorkingDir()
+	sqlLoggerPath := path.Join(rootDir, "logs/identity/sql.log")
+	sqlLogger := logger.NewLogger(logger.LoggerConfig{
+		Level:      "info",
+		Filename:   sqlLoggerPath,
+		MaxSize:    1,
+		MaxBackups: 5,
+		MaxAge:     5,
+		Compress:   true,
+		AppEnv:     config.AppConfig.Server.AppEnv,
+	})
+
+	conf.ConnConfig.Tracer = &tracelog.TraceLog{
+		Logger: &pgx.PgxLogTracer{
+			Logger:         *sqlLogger,
+			SlowQueryLimit: 500 * time.Millisecond,
+		},
+		LogLevel: tracelog.LogLevelDebug,
+	}
+
+	// connection pool settings
 	conf.MaxConns = 50
 	conf.MinConns = 5
 	conf.MaxConnLifetime = 30 * time.Minute
@@ -49,7 +75,7 @@ func InitDB() error {
 		return fmt.Errorf("db ping error: %v", err)
 	}
 
-	log.Printf("✅ Connected Database Postgresql")
+	logger.Log.Info().Msg("✅ Connected Database Postgresql")
 
 	return nil
 }

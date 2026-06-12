@@ -2,7 +2,6 @@ package command
 
 import (
 	"context"
-	"log"
 
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/decorator"
 )
@@ -29,8 +28,6 @@ func NewUpdateProfileHandler() UpdateProfileHandler {
 }
 
 func (h updateProfileHandler) Handle(ctx context.Context, cmd UpdateProfileCommand) (bool, error) {
-
-	log.Printf("cmd: %+v", cmd)
 
 	return true, nil
 }
