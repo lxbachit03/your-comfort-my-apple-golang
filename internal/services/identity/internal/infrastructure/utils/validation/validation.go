@@ -22,10 +22,10 @@ func HandleValidationError(err error) apiresponse.ValidationErrorResponse {
 
 			for i, part := range parts {
 				if strings.Contains(part, "[") {
-					// idx := strings.Index(part, "[")
-					// base := utils.CamelToSnake(part[:idx])
-					// index := part[idx:]
-					// parts[i] = base + index
+					idx := strings.Index(part, "[")
+					base := utils.CamelToSnake(part[:idx])
+					index := part[idx:]
+					parts[i] = base + index
 				} else {
 					parts[i] = utils.CamelToSnake(part)
 				}
