@@ -6,7 +6,7 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
-	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/middleware"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/middlewares"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
@@ -25,11 +25,11 @@ func RegisterRoutes(r *gin.Engine, uc *usecase.Usecase, routes ...Route) {
 
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(
-		middleware.RateLimiterMiddleware(rateLimterLogger),
-		middleware.CORSMiddleware(),
-		middleware.TraceIdMiddleware(),
-		middleware.HttpLoggerMiddleware(httpLogger),
-		middleware.RecoveryMiddleware(recoveryLogger),
+		middlewares.RateLimiterMiddleware(rateLimterLogger),
+		middlewares.CORSMiddleware(),
+		middlewares.TraceIdMiddleware(),
+		middlewares.HttpLoggerMiddleware(httpLogger),
+		middlewares.RecoveryMiddleware(recoveryLogger),
 		// middleware.ApiKeyMiddleware(),
 		// AuthMiddleware
 	)
