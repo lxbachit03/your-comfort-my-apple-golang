@@ -5,7 +5,7 @@ IDENTITY_MIGRATION_DIR := "internal/services/identity/internal/infrastructure/db
 IDENTITY_DB_CONN_STRING = postgresql://$(IDENTITY_POSTGRES_DB_USER):$(IDENTITY_POSTGRES_DB_PASSWORD)@$(IDENTITY_POSTGRES_DB_HOST):$(IDENTITY_POSTGRES_DB_PORT)/$(IDENTITY_POSTGRES_DB_NAME)?sslmode=$(IDENTITY_POSTGRES_DB_SSL_MODE)
 
 start-identity:
-	go run ./internal/services/identity/cmd/server/main.go
+	go run ./internal/services/identity/cmd/server/main.go ENV=$(ENV)
 
 identity-sqlc:
 	sqlc generate

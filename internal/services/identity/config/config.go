@@ -48,7 +48,8 @@ func LoadConfig(configPath string, env string) error {
 	// Default values if env variables or config file not provided
 	AppConfig = Config{
 		Server: ServerConfig{
-			Port: 8080,
+			AppEnv: "local",
+			Port:   8080,
 		},
 		Database: DatabaseConfig{
 			Name:     "identity",

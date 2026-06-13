@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
 	"github.com/rs/zerolog"
 	"golang.org/x/time/rate"
 )
@@ -48,7 +49,10 @@ func RateLimiterMiddleware(rateLimterLogger *zerolog.Logger) gin.HandlerFunc {
 
 		if !limiter.Allow() {
 			if shoudLogRateLimit(clientIp) {
+				traceId := logger.GetTraceID(ctx.Request.Context())
+
 				rateLimterLogger.Warn().
+					Str("trace_id", traceId).
 					Str("method", ctx.Request.Method).
 					Str("path", ctx.Request.URL.Path).
 					Str("query", ctx.Request.URL.RawQuery).

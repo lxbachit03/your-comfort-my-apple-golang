@@ -124,8 +124,10 @@ func HttpLoggerMiddleware(httpLogger *zerolog.Logger) gin.HandlerFunc {
 			logEvent = httpLogger.Warn()
 		}
 
+		traceId := logger.GetTraceID(ctx.Request.Context())
+
 		logEvent.
-			Str("trace_id", logger.GetTraceID(ctx.Request.Context())).
+			Str("trace_id", traceId).
 			Str("method", ctx.Request.Method).
 			Str("path", ctx.Request.URL.Path).
 			Str("query", ctx.Request.URL.RawQuery).

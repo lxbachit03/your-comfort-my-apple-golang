@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path"
 
@@ -22,11 +23,17 @@ func main() {
 	// `make start-identity ENV=prod` -> env = "prod"
 	// `make start-identity` -> env = "local" (default)
 	var env = os.Getenv("ENV")
+
+	log.Printf("ENV: %s", env)
+
 	if env == "" {
 		env = "local"
 	}
 	var envFile = fmt.Sprintf(".env.%s", env)
 	var envPath = path.Join(rootDir, envFile)
+
+	log.Printf("envFile: %s", envFile)
+	log.Printf("envPath: %s", envPath)
 
 	// Init Application Logger
 	logPath := path.Join(rootDir, "logs/identity/app.log")
@@ -40,8 +47,8 @@ func main() {
 		AppEnv:     env,
 	})
 
-	// Load local environment variables
-	if err := godotenv.Load(envPath); err != nil {
+	// Load local environment variables (overloading existing variables like those exported from .env.local via Makefile)
+	if err := godotenv.Overload(envPath); err != nil {
 		logger.Log.Warn().Msg("⚠️ Unable to load env file")
 	} else {
 		logger.Log.Info().Msg("✅ Environment variables loaded successfully")
@@ -49,6 +56,9 @@ func main() {
 
 	// Load config
 	var configPath = path.Join(rootDir, "internal/services/identity/config")
+
+	log.Printf("env 123: %s", env)
+
 	if err := config.LoadConfig(configPath, env); err != nil {
 		logger.Log.Fatal().Msg("❌ Unable to load config")
 	}

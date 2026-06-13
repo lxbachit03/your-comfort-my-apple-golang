@@ -39,8 +39,10 @@ func (t *PgxLogTracer) Log(ctx context.Context, level tracelog.LogLevel, msg str
 		finalSQL = queryInfo.CleanSQL
 	}
 
+	traceId := logger.GetTraceID(ctx)
+
 	baseLogger := t.Logger.With().
-		Str("trace_id", logger.GetTraceID(ctx)).
+		Str("trace_id", traceId).
 		Dur("duration", duration).
 		Str("sql_original", queryInfo.OriginalSQL).
 		Str("sql", finalSQL).

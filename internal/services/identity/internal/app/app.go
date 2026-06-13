@@ -14,7 +14,7 @@ import (
 	validator "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/validator"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
 	v1handler "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/handlers/v1"
-	route "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes"
+	routes "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes"
 	v1routes "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes/v1"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/db"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/db/repository"
@@ -63,12 +63,12 @@ func NewApplication() (*Application, error) {
 	v1authHandler := v1handler.NewAuthRouteHandler(usecases)
 	v1userHandler := v1handler.NewUserRouteHandler(usecases)
 
-	routeList := []route.Route{
+	routeList := []routes.Route{
 		v1routes.NewAuthRoutes(v1authHandler),
 		v1routes.NewUserRoutes(v1userHandler),
 	}
 
-	route.RegisterRoutes(r, usecases, routeList...)
+	routes.RegisterRoutes(r, usecases, routeList...)
 
 	return &Application{
 		r: r,

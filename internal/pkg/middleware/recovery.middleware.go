@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
 	"github.com/rs/zerolog"
 )
 
@@ -21,7 +22,10 @@ func RecoveryMiddleware(recoveryLogger *zerolog.Logger) gin.HandlerFunc {
 
 				statck_at := ExtractFirstAppStackLine(stack)
 
+				traceId := logger.GetTraceID(ctx.Request.Context())
+
 				recoveryLogger.Error().
+					Str("trace_id", traceId).
 					Str("path", ctx.Request.URL.Path).
 					Str("method", ctx.Request.Method).
 					Str("client_ip", ctx.ClientIP()).

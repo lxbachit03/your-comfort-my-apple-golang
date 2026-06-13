@@ -25,8 +25,9 @@ func RegisterRoutes(r *gin.Engine, uc *usecase.Usecase, routes ...Route) {
 
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(
-		middleware.CORSMiddleware(),
 		middleware.RateLimiterMiddleware(rateLimterLogger),
+		middleware.CORSMiddleware(),
+		middleware.TraceIdMiddleware(),
 		middleware.HttpLoggerMiddleware(httpLogger),
 		middleware.RecoveryMiddleware(recoveryLogger),
 		// middleware.ApiKeyMiddleware(),
