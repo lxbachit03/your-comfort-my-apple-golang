@@ -18,7 +18,7 @@ type loginAccountHandler struct {
 }
 
 func NewLoginAccountHandler() LoginAccountHandler {
-	return decorator.ApplyCommandDecorators[LoginAccountCommand, v1dto.LoginAccountResponse](
+	return decorator.ApplyCommandDecorators(
 		loginAccountHandler{},
 	)
 }

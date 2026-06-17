@@ -41,3 +41,26 @@ func (arh *AuthRouteHandler) LoginAccount(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, result)
 }
+
+func (arh *AuthRouteHandler) RegisterAccount(ctx *gin.Context) {
+	var request v1dto.RegisterAccountRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		apiresponse.ValidationErrorResp(ctx, identity_validator.HandleValidationError(err))
+		return
+	}
+
+	cmd := command.RegisterAccountCommand{
+		Email:           request.Email,
+		Password:        request.Password,
+		ConfirmPassword: request.ConfirmPassword,
+		FirstName:       request.FirstName,
+		LastName:        request.LastName,
+	}
+
+	result, err := arh.uc.Commands.RegisterAccountHandler.Handle(ctx.Request.Context(), cmd)
+	if err != nil {
+		apiresponse.ErrorResponse(ctx, err)
+	}
+
+	apiresponse.Response(ctx, http.StatusOK, "User registered successfully", result)
+}

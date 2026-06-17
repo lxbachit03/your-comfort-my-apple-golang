@@ -12,9 +12,10 @@ type Usecase struct {
 }
 
 type Commands struct {
-	LoginAccountHandler  authCommand.LoginAccountHandler
-	AddAddressHandler    userCommand.AddAddressHandler
-	UpdateProfileHandler userCommand.UpdateProfileHandler
+	LoginAccountHandler    authCommand.LoginAccountHandler
+	RegisterAccountHandler authCommand.RegisterAccountHandler
+	AddAddressHandler      userCommand.AddAddressHandler
+	UpdateProfileHandler   userCommand.UpdateProfileHandler
 }
 
 type Queries struct {

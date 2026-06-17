@@ -11,6 +11,54 @@ import (
 	"github.com/google/uuid"
 )
 
+const createUser = `-- name: CreateUser :one
+INSERT INTO
+    users (
+        user_email,
+        user_password,
+        user_fullname,
+        user_age,
+        user_status,
+        user_level
+    )
+VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id, user_uuid, user_email, user_password, user_fullname, user_age, user_status, user_level, user_deleted_at, user_created_at, user_updated_at
+`
+
+type CreateUserParams struct {
+	UserEmail    string `json:"user_email"`
+	UserPassword string `json:"user_password"`
+	UserFullname string `json:"user_fullname"`
+	UserAge      *int32 `json:"user_age"`
+	UserStatus   int32  `json:"user_status"`
+	UserLevel    int32  `json:"user_level"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUser,
+		arg.UserEmail,
+		arg.UserPassword,
+		arg.UserFullname,
+		arg.UserAge,
+		arg.UserStatus,
+		arg.UserLevel,
+	)
+	var i User
+	err := row.Scan(
+		&i.UserID,
+		&i.UserUuid,
+		&i.UserEmail,
+		&i.UserPassword,
+		&i.UserFullname,
+		&i.UserAge,
+		&i.UserStatus,
+		&i.UserLevel,
+		&i.UserDeletedAt,
+		&i.UserCreatedAt,
+		&i.UserUpdatedAt,
+	)
+	return i, err
+}
+
 const getUser = `-- name: GetUser :one
 SELECT user_id, user_uuid, user_email, user_password, user_fullname, user_age, user_status, user_level, user_deleted_at, user_created_at, user_updated_at FROM users WHERE user_uuid = $1
 `

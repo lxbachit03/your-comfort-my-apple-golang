@@ -22,7 +22,7 @@ type updateProfileHandler struct {
 }
 
 func NewUpdateProfileHandler() UpdateProfileHandler {
-	return decorator.ApplyCommandDecorators[UpdateProfileCommand, bool](
+	return decorator.ApplyCommandDecorators(
 		updateProfileHandler{},
 	)
 }

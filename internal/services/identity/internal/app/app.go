@@ -50,9 +50,10 @@ func NewApplication() (*Application, error) {
 
 	usecases := &usecase.Usecase{
 		Commands: usecase.Commands{
-			LoginAccountHandler:  command.NewLoginAccountHandler(),
-			AddAddressHandler:    usersCommand.NewAddAddressHandler(),
-			UpdateProfileHandler: usersCommand.NewUpdateProfileHandler(),
+			LoginAccountHandler:    command.NewLoginAccountHandler(),
+			RegisterAccountHandler: command.NewRegisterAccountHandler(userRepository),
+			AddAddressHandler:      usersCommand.NewAddAddressHandler(),
+			UpdateProfileHandler:   usersCommand.NewUpdateProfileHandler(),
 		},
 		Queries: usecase.Queries{
 			GetUsersHandler:      query.NewGetUsersHandler(),

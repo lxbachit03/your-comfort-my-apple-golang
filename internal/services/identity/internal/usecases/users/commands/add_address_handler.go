@@ -22,7 +22,7 @@ type addAddressHandler struct {
 }
 
 func NewAddAddressHandler() AddAddressHandler {
-	return decorator.ApplyCommandDecorators[AddAddressCommand, bool](
+	return decorator.ApplyCommandDecorators(
 		addAddressHandler{},
 	)
 }

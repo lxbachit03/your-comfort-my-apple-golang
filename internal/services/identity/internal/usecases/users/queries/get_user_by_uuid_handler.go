@@ -15,15 +15,15 @@ type GetUserByUUIDQuery struct {
 }
 
 type getUserByUUIDHandler struct {
-	ur repository.UserRepository
+	userRepo repository.UserRepository
 }
 
 type GetUserByUUIDHandler decorator.QueryHandler[GetUserByUUIDQuery, v1dto.UserDTO]
 
-func NewGetUserByUUIDHandler(ur repository.UserRepository) GetUserByUUIDHandler {
+func NewGetUserByUUIDHandler(userRepo repository.UserRepository) GetUserByUUIDHandler {
 	return decorator.ApplyQueryDecorators[GetUserByUUIDQuery, v1dto.UserDTO](
 		getUserByUUIDHandler{
-			ur: ur,
+			userRepo: userRepo,
 		},
 	)
 }
@@ -38,7 +38,7 @@ func (h getUserByUUIDHandler) Handle(ctx context.Context, q GetUserByUUIDQuery) 
 		return v1dto.UserDTO{}, errors.New("invalid uuid")
 	}
 
-	user, err := h.ur.GetUserByUUID(ctx, uuid)
+	user, err := h.userRepo.GetUserByUUID(ctx, uuid)
 	if err != nil {
 		return v1dto.UserDTO{}, err
 	}

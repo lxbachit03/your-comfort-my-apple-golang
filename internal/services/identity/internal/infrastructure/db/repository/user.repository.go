@@ -15,6 +15,7 @@ import (
 
 type UserRepository interface {
 	GetUserByUUID(ctx context.Context, userUUID uuid.UUID) (sqlc.User, error)
+	CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error)
 }
 
 type userRepository struct {
@@ -40,6 +41,15 @@ func (ur userRepository) GetUserByUUID(ctx context.Context, userUUID uuid.UUID) 
 		}
 
 		return sqlc.User{}, fmt.Errorf("GetUserByUUID : query error: %w", err)
+	}
+
+	return user, nil
+}
+
+func (ur userRepository) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error) {
+	user, err := ur.db.CreateUser(ctx, arg)
+	if err != nil {
+		return sqlc.User{}, fmt.Errorf("CreateUser : query error: %w", err)
 	}
 
 	return user, nil

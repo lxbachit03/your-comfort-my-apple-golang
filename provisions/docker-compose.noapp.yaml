@@ -19,7 +19,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${IDENTITY_POSTGRES_USER} -d ${IDENTITY_POSTGRES_DB}",
+          "pg_isready -U ${IDENTITY_POSTGRES_DB_USER} -d ${IDENTITY_POSTGRES_DB_NAME}",
         ]
       interval: 30s
       timeout: 10s
