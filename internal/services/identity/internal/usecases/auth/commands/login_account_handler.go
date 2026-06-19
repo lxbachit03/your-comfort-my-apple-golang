@@ -96,7 +96,7 @@ func (h *loginAccountHandler) Handle(ctx context.Context, cmd LoginAccountComman
 	// user -> input:otp + token
 
 	// generate AT and RT
-	accessToken, err := h.jwtService.GenerateAccessToken(jwt.JwtPayload{
+	accessToken, err := h.jwtService.GenerateAccessToken(jwt.AccessTokenPayload{
 		UserUUID:  user.UserUuid.String(),
 		UserEmail: user.UserEmail,
 	})
@@ -104,7 +104,10 @@ func (h *loginAccountHandler) Handle(ctx context.Context, cmd LoginAccountComman
 		return v1dto.LoginAccountResponse{}, err
 	}
 
-	refreshToken, err := h.jwtService.GenerateRefreshToken()
+	refreshToken, err := h.jwtService.GenerateRefreshToken(jwt.RefreshTokenPayload{
+		UserUUID:  user.UserUuid.String(),
+		UserEmail: user.UserEmail,
+	})
 	if err != nil {
 		return v1dto.LoginAccountResponse{}, err
 	}
@@ -120,7 +123,7 @@ func (h *loginAccountHandler) Handle(ctx context.Context, cmd LoginAccountComman
 
 	return v1dto.LoginAccountResponse{
 		AccessToken:  accessToken.Token,
-		RefreshToken: refreshToken,
+		RefreshToken: refreshToken.Token,
 		ExpiresIn:    accessToken.TTL,
 	}, nil
 }

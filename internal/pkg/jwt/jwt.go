@@ -1,6 +1,8 @@
 package jwt
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"time"
 
@@ -11,9 +13,9 @@ import (
 )
 
 type JwtService interface {
-	GenerateAccessToken(data JwtPayload) (AccessToken, error)
-	GenerateRefreshToken() (string, error)
-	StoreRefreshToken(refreshToken string) error
+	GenerateAccessToken(payload AccessTokenPayload) (AccessToken, error)
+	GenerateRefreshToken(payload RefreshTokenPayload) (RefreshToken, error)
+	StoreRefreshToken(refreshToken RefreshToken) error
 }
 
 type AccessToken struct {
@@ -21,9 +23,22 @@ type AccessToken struct {
 	TTL   int
 }
 
-type JwtPayload struct {
+type AccessTokenPayload struct {
 	UserUUID  string
 	UserEmail string
+}
+
+type RefreshTokenPayload struct {
+	UserUUID  string
+	UserEmail string
+}
+
+type RefreshToken struct {
+	Token     string
+	UserUUID  string
+	UserEmail string
+	ExpireAt  time.Time
+	Revoked   bool
 }
 
 var (
@@ -32,6 +47,8 @@ var (
 	JWT_ACCESS_TOKEN_TTL  time.Duration
 	JWT_REFRESH_TOKEN_TTL time.Duration
 	JWT_ISSUER            string
+
+	CACHE_REFRESH_TOKEN_KEY_PREFIX string = "REFRESH_TOKEN:"
 )
 
 type jwtService struct{}
@@ -47,11 +64,7 @@ func NewJwtService() JwtService {
 	return &jwtService{}
 }
 
-func (jv *jwtService) GenerateAccessToken(data JwtPayload) (AccessToken, error) {
-	payload := JwtPayload{
-		UserUUID:  data.UserUUID,
-		UserEmail: data.UserEmail,
-	}
+func (jv *jwtService) GenerateAccessToken(payload AccessTokenPayload) (AccessToken, error) {
 
 	rawData, err := json.Marshal(payload)
 	if err != nil {
@@ -83,10 +96,23 @@ func (jv *jwtService) GenerateAccessToken(data JwtPayload) (AccessToken, error) 
 	}, nil
 }
 
-func (jv *jwtService) GenerateRefreshToken() (string, error) {
-	panic("unimplemented")
+func (jv *jwtService) GenerateRefreshToken(payload RefreshTokenPayload) (RefreshToken, error) {
+	tokenBytes := make([]byte, 32)
+	if _, err := rand.Read(tokenBytes); err != nil {
+		return RefreshToken{}, err
+	}
+
+	token := base64.URLEncoding.EncodeToString(tokenBytes)
+
+	return RefreshToken{
+		Token:     token,
+		UserUUID:  payload.UserUUID,
+		UserEmail: payload.UserEmail,
+		ExpireAt:  time.Now().Add(JWT_REFRESH_TOKEN_TTL),
+		Revoked:   false,
+	}, nil
 }
 
-func (jv *jwtService) StoreRefreshToken(refreshToken string) error {
+func (jv *jwtService) StoreRefreshToken(refreshToken RefreshToken) error {
 	panic("unimplemented")
 }
