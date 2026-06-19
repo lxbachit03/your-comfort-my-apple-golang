@@ -25,8 +25,30 @@ services:
       timeout: 10s
       retries: 3
 
+  ygz.redis:
+    image: redis:8.0-alpine
+    container_name: ygz.redis
+    restart: unless-stopped
+    environment:
+      REDIS_DB: ${REDIS_DB}
+      REDIS_USER: ${REDIS_USER}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - ygz-redis:/data
+      - ./volumes/configs/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - ygz-app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 volumes:
   ygz-identity-postgres:
+  ygz-redis:
 
 networks:
   ygz-app-network:
