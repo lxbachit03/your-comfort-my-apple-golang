@@ -11,7 +11,9 @@ database:
   ssl_mode: "[IDENTITY_POSTGRES_DB_SSL_MODE]"
 security:
   jwt:
-    access_secret: "[IDENTITY_JWT_ACCESS_SECRET]"
+    secret: "[IDENTITY_JWT_SECRET]"
     refresh_secret: "[IDENTITY_JWT_REFRESH_SECRET]"
-    access_ttl: "[IDENTITY_JWT_ACCESS_TTL]"
-    refresh_ttl: "[IDENTITY_JWT_REFRESH_TTL]"
+    encryption_key: "[IDENTITY_JWT_ENCRYPTION_KEY]"
+    access_ttl: "[IDENTITY_JWT_ACCESS_TOKEN_TTL]"
+    refresh_ttl: "[IDENTITY_JWT_REFRESH_TOKEN_TTL]"
+    issuer: "[IDENTITY_JWT_ISSUER]"

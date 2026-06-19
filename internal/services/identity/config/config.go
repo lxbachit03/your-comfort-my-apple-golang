@@ -20,10 +20,12 @@ type DatabaseConfig struct {
 }
 
 type JWTConfig struct {
-	AccessSecret  string `mapstructure:"access_secret"`
-	RefreshSecret string `mapstructure:"refresh_secret"`
-	AccessTTL     string `mapstructure:"access_ttl"`
-	RefreshTTL    string `mapstructure:"refresh_ttl"`
+	Secret          string `mapstructure:"secret"`
+	RefreshSecret   string `mapstructure:"refresh_secret"`
+	EncryptionKey   string `mapstructure:"encryption_key"`
+	AccessTokenTtl  int    `mapstructure:"access_ttl"`
+	RefreshTokenTtl int    `mapstructure:"refresh_ttl"`
+	Issuer          string `mapstructure:"issuer"`
 }
 
 type SecurityConfig struct {
@@ -62,10 +64,11 @@ func LoadConfig(configPath string, env string) error {
 		},
 		Security: SecurityConfig{
 			Jwt: JWTConfig{
-				AccessSecret:  "your_jwt_access_secret_key",
-				RefreshSecret: "your_jwt_refresh_secret_key",
-				AccessTTL:     "15m",
-				RefreshTTL:    "7d",
+				Secret:          "your_jwt_access_secret_key",
+				RefreshSecret:   "your_jwt_refresh_secret_key",
+				AccessTokenTtl:  60 * 60 * 24 * 7,
+				RefreshTokenTtl: 60 * 60 * 24 * 30,
+				Issuer:          "your_jwt_issuer",
 			},
 		},
 	}
@@ -82,10 +85,12 @@ func LoadConfig(configPath string, env string) error {
 	viper.BindEnv("database.password", "IDENTITY_POSTGRES_DB_PASSWORD")
 	viper.BindEnv("database.ssl_mode", "IDENTITY_POSTGRES_DB_SSL_MODE")
 
-	viper.BindEnv("security.jwt.access_secret", "IDENTITY_JWT_ACCESS_SECRET")
+	viper.BindEnv("security.jwt.secret", "IDENTITY_JWT_SECRET")
 	viper.BindEnv("security.jwt.refresh_secret", "IDENTITY_JWT_REFRESH_SECRET")
-	viper.BindEnv("security.jwt.access_ttl", "IDENTITY_JWT_ACCESS_TTL")
-	viper.BindEnv("security.jwt.refresh_ttl", "IDENTITY_JWT_REFRESH_TTL")
+	viper.BindEnv("security.jwt.encryption_key", "IDENTITY_JWT_ENCRYPTION_KEY")
+	viper.BindEnv("security.jwt.access_ttl", "IDENTITY_JWT_ACCESS_TOKEN_TTL")
+	viper.BindEnv("security.jwt.refresh_ttl", "IDENTITY_JWT_REFRESH_TOKEN_TTL")
+	viper.BindEnv("security.jwt.issuer", "IDENTITY_JWT_ISSUER")
 
 	if err := viper.ReadInConfig(); err != nil {
 		return err

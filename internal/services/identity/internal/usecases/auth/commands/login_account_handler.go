@@ -96,7 +96,10 @@ func (h *loginAccountHandler) Handle(ctx context.Context, cmd LoginAccountComman
 	// user -> input:otp + token
 
 	// generate AT and RT
-	accessToken, err := h.jwtService.GenerateAccessToken()
+	accessToken, err := h.jwtService.GenerateAccessToken(jwt.JwtPayload{
+		UserUUID:  user.UserUuid.String(),
+		UserEmail: user.UserEmail,
+	})
 	if err != nil {
 		return v1dto.LoginAccountResponse{}, err
 	}
