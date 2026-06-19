@@ -13,6 +13,7 @@ import (
 	auth_pkg "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/auth/jwt"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/cache"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/queue/rabbitmq"
 	hash_pkg "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/security/hash"
 	validator "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/validator"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
@@ -60,6 +61,15 @@ func NewApplication() (*Application, error) {
 		time.Duration(config.AppConfig.Security.Jwt.RefreshTokenTtl)*time.Second,
 	)
 	hashService := hash_pkg.NewHashService()
+
+	// rabbitmq
+	messageQueueService := rabbitmq.NewRabbitMQService(
+		rabbitmq.MessageQueueConfig{
+			Host:     config.AppConfig.MessageQueue.RabbitMQ.Host,
+			Port:     config.AppConfig.MessageQueue.RabbitMQ.Port,
+			User:     config.AppConfig.MessageQueue.RabbitMQ.User,
+			Password: config.AppConfig.MessageQueue.RabbitMQ.Password,
+		}, logger.Log)
 
 	// repositories
 	userRepository := repository.NewUserRepository(db.DB)

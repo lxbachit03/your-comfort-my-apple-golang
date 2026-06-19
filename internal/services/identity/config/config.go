@@ -44,11 +44,23 @@ type RedisConfig struct {
 	Password string `mapstructure:"password"`
 }
 
+type RabbitMQConfig struct {
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+}
+
+type MessageQueueConfig struct {
+	RabbitMQ RabbitMQConfig `mapstructure:"rabbitmq"`
+}
+
 type Config struct {
-	Server   ServerConfig   `mapstructure:"server"`
-	Database DatabaseConfig `mapstructure:"database"`
-	Security SecurityConfig `mapstructure:"security"`
-	Cache    CacheConfig    `mapstructure:"cache"`
+	Server       ServerConfig       `mapstructure:"server"`
+	Database     DatabaseConfig     `mapstructure:"database"`
+	Security     SecurityConfig     `mapstructure:"security"`
+	Cache        CacheConfig        `mapstructure:"cache"`
+	MessageQueue MessageQueueConfig `mapstructure:"message_queue"`
 }
 
 var AppConfig Config
@@ -61,39 +73,47 @@ func LoadConfig(configPath string, env string) error {
 	viper.SetConfigType("yaml")
 
 	// Default values if env variables or config file not provided
-	// AppConfig = Config{
-	// 	Server: ServerConfig{
-	// 		AppEnv: "local",
-	// 		Port:   8080,
-	// 	},
-	// 	Database: DatabaseConfig{
-	// 		Name:     "identity",
-	// 		Database: "identity",
-	// 		Host:     "localhost",
-	// 		Port:     5432,
-	// 		User:     "admin",
-	// 		Password: "adminpassword",
-	// 		SSLMode:  "disable",
-	// 	},
-	// 	Security: SecurityConfig{
-	// 		Jwt: JWTConfig{
-	// 			Secret:          "your_jwt_access_secret_key",
-	// 			RefreshSecret:   "your_jwt_refresh_secret_key",
-	// 			AccessTokenTtl:  60 * 60 * 24 * 7,
-	// 			RefreshTokenTtl: 60 * 60 * 24 * 30,
-	// 			Issuer:          "your_jwt_issuer",
-	// 		},
-	// 	},
-	// 	Cache: CacheConfig{
-	// 		Redis: RedisConfig{
-	// 			DB:       0,
-	// 			Host:     "127.0.0.1",
-	// 			Port:     6379,
-	// 			User:     "",
-	// 			Password: "",
-	// 		},
-	// 	},
-	// }
+	AppConfig = Config{
+		Server: ServerConfig{
+			AppEnv: "local",
+			Port:   8080,
+		},
+		Database: DatabaseConfig{
+			Name:     "identity",
+			Database: "identity",
+			Host:     "localhost",
+			Port:     5432,
+			User:     "admin",
+			Password: "adminpassword",
+			SSLMode:  "disable",
+		},
+		Security: SecurityConfig{
+			Jwt: JWTConfig{
+				Secret:          "your_jwt_access_secret_key",
+				RefreshSecret:   "your_jwt_refresh_secret_key",
+				AccessTokenTtl:  60 * 60 * 24 * 7,
+				RefreshTokenTtl: 60 * 60 * 24 * 30,
+				Issuer:          "your_jwt_issuer",
+			},
+		},
+		Cache: CacheConfig{
+			Redis: RedisConfig{
+				DB:       0,
+				Host:     "127.0.0.1",
+				Port:     6379,
+				User:     "",
+				Password: "",
+			},
+		},
+		MessageQueue: MessageQueueConfig{
+			RabbitMQ: RabbitMQConfig{
+				Host:     "127.0.0.1",
+				Port:     5672,
+				User:     "guest",
+				Password: "guest",
+			},
+		},
+	}
 
 	// Bind Custom Environment Variables to Config keys
 	viper.BindEnv("server.app_env", "APP_ENV")
@@ -119,6 +139,11 @@ func LoadConfig(configPath string, env string) error {
 	viper.BindEnv("cache.redis.port", "CACHE_REDIS_PORT")
 	viper.BindEnv("cache.redis.user", "CACHE_REDIS_USER")
 	viper.BindEnv("cache.redis.password", "CACHE_REDIS_PASSWORD")
+
+	viper.BindEnv("message_queue.rabbitmq.host", "MESSAGE_QUEUE_RABBITMQ_HOST")
+	viper.BindEnv("message_queue.rabbitmq.port", "MESSAGE_QUEUE_RABBITMQ_PORT")
+	viper.BindEnv("message_queue.rabbitmq.user", "MESSAGE_QUEUE_RABBITMQ_USER")
+	viper.BindEnv("message_queue.rabbitmq.password", "MESSAGE_QUEUE_RABBITMQ_PASSWORD")
 
 	if err := viper.ReadInConfig(); err != nil {
 		return err
