@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/jwt"
+	auth_pkg "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/auth/jwt"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
-	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/security/hash"
+	hash_pkg "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/security/hash"
 	validator "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/validator"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
 	v1handler "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/handlers/v1"
@@ -46,8 +46,8 @@ func NewApplication() (*Application, error) {
 	}
 
 	// external services
-	jwtService := jwt.NewJwtService()
-	hashService := hash.NewHashService()
+	jwtService := auth_pkg.NewJwtService()
+	hashService := hash_pkg.NewHashService()
 
 	// repositories
 	userRepository := repository.NewUserRepository(db.DB)

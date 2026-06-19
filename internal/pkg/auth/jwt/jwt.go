@@ -1,13 +1,15 @@
-package jwt
+package auth
 
 import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/cache"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/security/encrypt"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
 )
@@ -16,6 +18,10 @@ type JwtService interface {
 	GenerateAccessToken(payload AccessTokenPayload) (AccessToken, error)
 	GenerateRefreshToken(payload RefreshTokenPayload) (RefreshToken, error)
 	StoreRefreshToken(refreshToken RefreshToken) error
+	ParseToken(tokenString string) (*jwt.Token, jwt.MapClaims, error)
+	DecryptAccessTokenPayload(tokenString string) (*AccessTokenPayload, error)
+	ValidateRefreshToken(token string) (RefreshToken, error)
+	RevokeRefreshToken(token string) error
 }
 
 type AccessToken struct {
@@ -48,12 +54,18 @@ var (
 	JWT_REFRESH_TOKEN_TTL time.Duration
 	JWT_ISSUER            string
 
-	CACHE_REFRESH_TOKEN_KEY_PREFIX string = "REFRESH_TOKEN:"
+	CACHE_REFRESH_TOKEN_KEY_PREFIX string = "REFRESH_TOKEN"
 )
 
-type jwtService struct{}
+type jwtService struct {
+	redisService cache.CacheService
+}
 
-func NewJwtService() JwtService {
+func NewJwtService(redisService cache.CacheService) JwtService {
+
+	if redisService == nil {
+		panic("Redis service is nil")
+	}
 
 	JWT_SECRET = config.AppConfig.Security.Jwt.Secret
 	JWT_ENCRYPTION_KEY = config.AppConfig.Security.Jwt.EncryptionKey
@@ -61,7 +73,9 @@ func NewJwtService() JwtService {
 	JWT_REFRESH_TOKEN_TTL = time.Duration(config.AppConfig.Security.Jwt.RefreshTokenTtl) * time.Second
 	JWT_ISSUER = config.AppConfig.Security.Jwt.Issuer
 
-	return &jwtService{}
+	return &jwtService{
+		redisService: redisService,
+	}
 }
 
 func (jv *jwtService) GenerateAccessToken(payload AccessTokenPayload) (AccessToken, error) {
@@ -114,5 +128,29 @@ func (jv *jwtService) GenerateRefreshToken(payload RefreshTokenPayload) (Refresh
 }
 
 func (jv *jwtService) StoreRefreshToken(refreshToken RefreshToken) error {
+	cacheKey := fmt.Sprintf("%s:%s", CACHE_REFRESH_TOKEN_KEY_PREFIX, refreshToken.Token)
+
+	err := jv.redisService.Set(cacheKey, refreshToken, JWT_REFRESH_TOKEN_TTL)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (jv *jwtService) DecryptAccessTokenPayload(tokenString string) (*AccessTokenPayload, error) {
+	panic("unimplemented")
+}
+
+func (jv *jwtService) ParseToken(tokenString string) (*jwt.Token, jwt.MapClaims, error) {
+	panic("unimplemented")
+}
+
+func (jv *jwtService) RevokeRefreshToken(token string) error {
+	panic("unimplemented")
+}
+
+func (jv *jwtService) ValidateRefreshToken(token string) (RefreshToken, error) {
 	panic("unimplemented")
 }
