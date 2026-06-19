@@ -7,9 +7,10 @@ import (
 	"time"
 
 	apiresponse "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/api-response"
+	auth "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/auth/jwt"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/decorator"
 	errorcode "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/error_code"
-	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/jwt"
+
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/security/hash"
 	v1dto "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/dtos/v1"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/db/repository"
@@ -26,7 +27,7 @@ type LoginAccountHandler decorator.CommandHandler[LoginAccountCommand, v1dto.Log
 
 type loginAccountHandler struct {
 	userRepository repository.UserRepository
-	jwtService     jwt.JwtService
+	jwtService     auth.JwtService
 	hashService    hash.HashService
 }
 
@@ -42,7 +43,7 @@ var (
 	MAX_LOGIN_ATTEMPTS int
 )
 
-func NewLoginAccountHandler(userRepository repository.UserRepository, jwtService jwt.JwtService, hashService hash.HashService) LoginAccountHandler {
+func NewLoginAccountHandler(userRepository repository.UserRepository, jwtService auth.JwtService, hashService hash.HashService) LoginAccountHandler {
 	if userRepository == nil {
 		panic("nil userRepository")
 	}
@@ -96,7 +97,7 @@ func (h *loginAccountHandler) Handle(ctx context.Context, cmd LoginAccountComman
 	// user -> input:otp + token
 
 	// generate AT and RT
-	accessToken, err := h.jwtService.GenerateAccessToken(jwt.AccessTokenPayload{
+	accessToken, err := h.jwtService.GenerateAccessToken(auth.AccessTokenPayload{
 		UserUUID:  user.UserUuid.String(),
 		UserEmail: user.UserEmail,
 	})
@@ -104,7 +105,7 @@ func (h *loginAccountHandler) Handle(ctx context.Context, cmd LoginAccountComman
 		return v1dto.LoginAccountResponse{}, err
 	}
 
-	refreshToken, err := h.jwtService.GenerateRefreshToken(jwt.RefreshTokenPayload{
+	refreshToken, err := h.jwtService.GenerateRefreshToken(auth.RefreshTokenPayload{
 		UserUUID:  user.UserUuid.String(),
 		UserEmail: user.UserEmail,
 	})

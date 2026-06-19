@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	auth_pkg "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/auth/jwt"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/cache"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
 	hash_pkg "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/security/hash"
 	validator "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/validator"
@@ -20,6 +21,7 @@ import (
 	v1routes "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes/v1"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/db"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/db/repository"
+	ext_redis "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/external/redis"
 	identity_validator "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils/validation"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
 	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands"
@@ -45,8 +47,18 @@ func NewApplication() (*Application, error) {
 		logger.Log.Fatal().Err(err).Msg("Database init failed")
 	}
 
+	redisClient := ext_redis.NewRedisClient()
+
 	// external services
-	jwtService := auth_pkg.NewJwtService()
+	cacheService := cache.NewRedisCacheService(redisClient)
+	jwtService := auth_pkg.NewJwtService(
+		cacheService,
+		config.AppConfig.Security.Jwt.Secret,
+		config.AppConfig.Security.Jwt.EncryptionKey,
+		config.AppConfig.Security.Jwt.Issuer,
+		time.Duration(config.AppConfig.Security.Jwt.AccessTokenTtl)*time.Second,
+		time.Duration(config.AppConfig.Security.Jwt.RefreshTokenTtl)*time.Second,
+	)
 	hashService := hash_pkg.NewHashService()
 
 	// repositories

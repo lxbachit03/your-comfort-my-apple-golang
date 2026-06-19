@@ -11,7 +11,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/cache"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/security/encrypt"
-	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
 )
 
 type JwtService interface {
@@ -61,17 +60,20 @@ type jwtService struct {
 	redisService cache.CacheService
 }
 
-func NewJwtService(redisService cache.CacheService) JwtService {
+// !!! DO NOT IMPORT "internal/services/identity/config" HERE !!!
+// This is a shared package (root module). Importing a specific service (sub-module)
+// creates a circular dependency that breaks go mod tidy!
+func NewJwtService(redisService cache.CacheService, secret, encryptionKey, issuer string, accessTTL, refreshTTL time.Duration) JwtService {
 
 	if redisService == nil {
 		panic("Redis service is nil")
 	}
 
-	JWT_SECRET = config.AppConfig.Security.Jwt.Secret
-	JWT_ENCRYPTION_KEY = config.AppConfig.Security.Jwt.EncryptionKey
-	JWT_ACCESS_TOKEN_TTL = time.Duration(config.AppConfig.Security.Jwt.AccessTokenTtl) * time.Second
-	JWT_REFRESH_TOKEN_TTL = time.Duration(config.AppConfig.Security.Jwt.RefreshTokenTtl) * time.Second
-	JWT_ISSUER = config.AppConfig.Security.Jwt.Issuer
+	JWT_SECRET = secret
+	JWT_ENCRYPTION_KEY = encryptionKey
+	JWT_ACCESS_TOKEN_TTL = accessTTL
+	JWT_REFRESH_TOKEN_TTL = refreshTTL
+	JWT_ISSUER = issuer
 
 	return &jwtService{
 		redisService: redisService,
