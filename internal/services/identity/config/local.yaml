@@ -11,9 +11,9 @@ database:
   ssl_mode: "disable"
 security:
   jwt:
-    secret: "local_secret"
-    refresh_secret: "local_refresh_secret"
-    encryption_key: "local_encryption_key"
+    secret: "local_secret_key_for_jwt_32bytes"
+    refresh_secret: "local_refresh_secret_key_32bytes"
+    encryption_key: "local_encryption_key_for_aes_32b"
     access_ttl: 900
     refresh_ttl: 604800
     issuer: "ygz_local"

@@ -25,7 +25,7 @@ type userRepository struct {
 
 // GetUserByEmail implements [UserRepository].
 func (ur *userRepository) GetUserByEmail(ctx context.Context, userEmail string) (sqlc.User, error) {
-	user, err := ur.GetUserByEmail(ctx, userEmail)
+	user, err := ur.db.GetUserByEmail(ctx, userEmail)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

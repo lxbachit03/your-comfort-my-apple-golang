@@ -11,9 +11,9 @@ database:
   ssl_mode: "disable"
 security:
   jwt:
-    secret: "dev_secret"
-    refresh_secret: "dev_refresh_secret"
-    encryption_key: "dev_encryption_key"
+    secret: "dev_secret_key_for_jwt_32bytes!!"
+    refresh_secret: "dev_refresh_secret_key_32bytes!!"
+    encryption_key: "dev_encryption_key_for_aes_32byt"
     access_ttl: 900
     refresh_ttl: 604800
     issuer: "ygz_dev"

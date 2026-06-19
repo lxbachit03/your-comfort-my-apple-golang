@@ -2,6 +2,7 @@ package command
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -121,6 +122,9 @@ func (h *loginAccountHandler) Handle(ctx context.Context, cmd LoginAccountComman
 
 	// delete rate limiter
 	h.cleanUpClientIP(cmd.ClientIP)
+
+	log.Printf("AccessToken: %v", accessToken.Token)
+	log.Printf("RefreshToken: %v", refreshToken.Token)
 
 	return v1dto.LoginAccountResponse{
 		AccessToken:  accessToken.Token,

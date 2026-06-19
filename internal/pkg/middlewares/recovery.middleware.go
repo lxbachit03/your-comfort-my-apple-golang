@@ -30,8 +30,8 @@ func RecoveryMiddleware(recoveryLogger *zerolog.Logger) gin.HandlerFunc {
 					Str("method", ctx.Request.Method).
 					Str("client_ip", ctx.ClientIP()).
 					Str("panic", fmt.Sprintf("%v", err)).
-					Str("statck_at", statck_at).
-					Str("statck", string(stack)).
+					Str("stack_at", statck_at).
+					Str("stack_trace", string(stack)).
 					Msg("panic occurred")
 
 				ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
