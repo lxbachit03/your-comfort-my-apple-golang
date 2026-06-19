@@ -31,6 +31,7 @@ func (arh *AuthRouteHandler) LoginAccount(ctx *gin.Context) {
 	cmd := command.LoginAccountCommand{
 		Email:    request.Email,
 		Password: request.Password,
+		ClientIP: ctx.ClientIP(),
 	}
 
 	result, err := arh.uc.Commands.LoginAccountHandler.Handle(ctx.Request.Context(), cmd)
@@ -38,6 +39,9 @@ func (arh *AuthRouteHandler) LoginAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// name, value, maxAge, path, domain, secure, httpOnly
+	ctx.SetCookie("refresh_token", result.RefreshToken, 7*24*60*60, "/", "", false, true)
 
 	ctx.JSON(http.StatusOK, result)
 }

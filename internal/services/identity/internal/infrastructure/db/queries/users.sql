@@ -12,3 +12,6 @@ INSERT INTO
         user_level
     )
 VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;
+
+-- name: GetUserByEmail :one
+SELECT * FROM users WHERE user_email = $1;

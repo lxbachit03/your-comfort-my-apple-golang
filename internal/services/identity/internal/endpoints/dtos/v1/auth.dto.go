@@ -15,7 +15,7 @@ type RegisterAccountRequest struct {
 
 type LoginAccountResponse struct {
 	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	RefreshToken string `json:"-"`
 	ExpiresIn    int    `json:"expires_in"`
 }
 

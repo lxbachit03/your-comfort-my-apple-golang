@@ -55,10 +55,14 @@ func HandleValidationError(err error) apiresponse.ValidationErrorResponse {
 				errors[fieldPath] = fmt.Sprintf("Must be at least %s", e.Param())
 			case "max_int":
 				errors[fieldPath] = fmt.Sprintf("Must be at most %s", e.Param())
+			case "eqfield":
+				errors[fieldPath] = fmt.Sprintf("Must be equal to %s", e.Param())
 			case "email":
 				errors[fieldPath] = "Must be a valid email address"
 			case "uuid":
 				errors[fieldPath] = "Must be a valid UUID"
+			default:
+				errors[fieldPath] = fmt.Sprintf("%s validation error", e.Tag())
 			}
 		}
 

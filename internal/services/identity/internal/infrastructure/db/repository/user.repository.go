@@ -15,11 +15,32 @@ import (
 
 type UserRepository interface {
 	GetUserByUUID(ctx context.Context, userUUID uuid.UUID) (sqlc.User, error)
+	GetUserByEmail(ctx context.Context, userEmail string) (sqlc.User, error)
 	CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error)
 }
 
 type userRepository struct {
 	db sqlc.Querier
+}
+
+// GetUserByEmail implements [UserRepository].
+func (ur *userRepository) GetUserByEmail(ctx context.Context, userEmail string) (sqlc.User, error) {
+	user, err := ur.GetUserByEmail(ctx, userEmail)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return sqlc.User{}, &apiresponse.ApiError{
+				StatusCode:   http.StatusBadRequest,
+				ErrorCode:    errorcode.ErrCodeBadRequest,
+				Message:      "User not found",
+				ErrorDetails: err,
+			}
+		}
+
+		return sqlc.User{}, fmt.Errorf("GetUserByUUID : query error: %w", err)
+	}
+
+	return user, nil
 }
 
 func NewUserRepository(db sqlc.Querier) UserRepository {
