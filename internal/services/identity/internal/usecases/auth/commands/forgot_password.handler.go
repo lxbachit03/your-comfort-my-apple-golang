@@ -2,6 +2,7 @@ package command
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/decorator"
 	errorcode "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/error_code"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/queue/rabbitmq"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/external/mail"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils"
 	"golang.org/x/time/rate"
@@ -88,19 +90,27 @@ func (h *forgotPasswordHandler) Handle(ctx context.Context, cmd ForgotPasswordCo
 	}
 
 	// send email with reset token
-	// resetLink := fmt.Sprintf("https://localhost:3000/auth/verify-reset-password?token=%s", token)
+	resetLink := fmt.Sprintf("https://localhost:3000/auth/verify-reset-password?token=%s", token)
 
-	// mailContent := &mail.Mail{
-	// 	To: []mail.Address{
-	// 		{
-	// 			Email: cmd.Email,
-	// 		},
-	// 	},
-	// 	Subject: "YGZ RESET PASSWORD",
-	// 	Text: fmt.Sprintf("Hi %s, \n\n You requested to reset your password. Please click the link below to reset it:\n%s\n\n The link will expire in 1 hour. \n\n Best regard, \nCode With Tuan Team",
-	// 		cmd.Email,
-	// 		resetLink),
-	// }
+	mailContent := &mail.Email{
+		From: mail.Address{
+			Name:  "YGZ",
+			Email: config.AppConfig.Mail.Sender,
+		},
+		To: []mail.Address{
+			{
+				Email: cmd.Email,
+			},
+		},
+		Subject: "YGZ RESET PASSWORD",
+		Text: fmt.Sprintf("Hi %s, \n\n You requested to reset your password. Please click the link below to reset it:\n%s\n\n The link will expire in 1 hour. \n\n Best regard, \nCode With Tuan Team",
+			cmd.Email,
+			resetLink),
+	}
+
+	if err := h.mailService.SendMail(ctx, mailContent); err != nil {
+		return false, err
+	}
 
 	// if err := h.mq.Publish("reset_password_queue", mailContent); err != nil {
 	// 	return false, err

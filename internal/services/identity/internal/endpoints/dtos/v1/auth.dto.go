@@ -13,6 +13,10 @@ type RegisterAccountRequest struct {
 	LastName        string `json:"last_name" binding:"required"`
 }
 
+type ForgotPasswordRequest struct {
+	Email string `json:"email" binding:"required"`
+}
+
 type LoginAccountResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"-"`

@@ -68,3 +68,22 @@ func (arh *AuthRouteHandler) RegisterAccount(ctx *gin.Context) {
 
 	apiresponse.Response(ctx, http.StatusOK, "User registered successfully", result)
 }
+
+func (arh *AuthRouteHandler) ForgotPassword(ctx *gin.Context) {
+	var request v1dto.ForgotPasswordRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		apiresponse.ValidationErrorResp(ctx, identity_validator.HandleValidationError(err))
+		return
+	}
+
+	cmd := command.ForgotPasswordCommand{
+		Email: request.Email,
+	}
+
+	result, err := arh.uc.Commands.ForgotPasswordHandler.Handle(ctx.Request.Context(), cmd)
+	if err != nil {
+		apiresponse.ErrorResponse(ctx, err)
+	}
+
+	apiresponse.Response(ctx, http.StatusOK, "Send email reset password successfully", result)
+}

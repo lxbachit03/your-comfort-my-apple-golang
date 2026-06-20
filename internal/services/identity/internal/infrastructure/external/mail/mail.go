@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
 	"github.com/rs/zerolog"
 )
 
@@ -61,7 +62,7 @@ func NewMailService(providerFactory MailFactory, logger *zerolog.Logger) MailSer
 
 func (ms *mailService) SendMail(ctx context.Context, email *Email) error {
 
-	traceId := ctx.Value("trace_id").(string)
+	traceId := logger.GetTraceID(ctx)
 
 	start := time.Now()
 

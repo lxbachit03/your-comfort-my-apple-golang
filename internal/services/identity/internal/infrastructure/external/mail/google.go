@@ -31,10 +31,12 @@ func NewGoogleMail(logger *zerolog.Logger) MailService {
 
 }
 
-func (g GoogleMail) SendMail(ctx context.Context, email *Email) error {
+func (g *GoogleMail) SendMail(ctx context.Context, email *Email) error {
 
 	from := config.AppConfig.Mail.Sender
 	password := config.AppConfig.Mail.Provider.Google.AppPassword
+
+	log.Printf("from: %s, password: %s", from, password)
 
 	auth := smtp.PlainAuth("", from, password, "smtp.gmail.com")
 
