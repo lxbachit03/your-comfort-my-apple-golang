@@ -57,8 +57,6 @@ func main() {
 	// Load config
 	var configPath = path.Join(rootDir, "internal/services/identity/config")
 
-	log.Printf("env 123: %s", env)
-
 	if err := config.LoadConfig(configPath, env); err != nil {
 		logger.Log.Fatal().Msg("❌ Unable to load config")
 	}

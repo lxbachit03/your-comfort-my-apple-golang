@@ -55,12 +55,27 @@ type MessageQueueConfig struct {
 	RabbitMQ RabbitMQConfig `mapstructure:"rabbitmq"`
 }
 
+type MailProviderGoogleConfig struct {
+	AppPassword string `mapstructure:"app_password"`
+}
+
+type MailProviderConfig struct {
+	Name   string                   `mapstructure:"name"`
+	Google MailProviderGoogleConfig `mapstructure:"google"`
+}
+
+type MailConfig struct {
+	Sender   string             `mapstructure:"sender"`
+	Provider MailProviderConfig `mapstructure:"provider"`
+}
+
 type Config struct {
 	Server       ServerConfig       `mapstructure:"server"`
 	Database     DatabaseConfig     `mapstructure:"database"`
 	Security     SecurityConfig     `mapstructure:"security"`
 	Cache        CacheConfig        `mapstructure:"cache"`
 	MessageQueue MessageQueueConfig `mapstructure:"message_queue"`
+	Mail         MailConfig         `mapstructure:"mail"`
 }
 
 var AppConfig Config
@@ -113,6 +128,15 @@ func LoadConfig(configPath string, env string) error {
 				Password: "guest",
 			},
 		},
+		Mail: MailConfig{
+			Sender: "default@ygz.com",
+			Provider: MailProviderConfig{
+				Name: "google",
+				Google: MailProviderGoogleConfig{
+					AppPassword: "",
+				},
+			},
+		},
 	}
 
 	// Bind Custom Environment Variables to Config keys
@@ -144,6 +168,10 @@ func LoadConfig(configPath string, env string) error {
 	viper.BindEnv("message_queue.rabbitmq.port", "MESSAGE_QUEUE_RABBITMQ_PORT")
 	viper.BindEnv("message_queue.rabbitmq.user", "MESSAGE_QUEUE_RABBITMQ_USER")
 	viper.BindEnv("message_queue.rabbitmq.password", "MESSAGE_QUEUE_RABBITMQ_PASSWORD")
+
+	viper.BindEnv("mail.sender", "MAIL_SENDER")
+	viper.BindEnv("mail.provider.name", "MAIL_PROVIDER_NAME")
+	viper.BindEnv("mail.provider.google.app_password", "MAIL_PROVIDER_GOOGLE_APP_PASSWORD")
 
 	if err := viper.ReadInConfig(); err != nil {
 		return err

@@ -30,3 +30,9 @@ message_queue:
     port: 5672
     user: "guest"
     password: "guest"
+mail:
+  sender: "ygzteam_dev@ygz.com"
+  provider:
+    name: "google"
+    google:
+      app_password: ""

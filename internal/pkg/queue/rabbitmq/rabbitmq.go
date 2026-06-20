@@ -22,7 +22,7 @@ type rabbitMQService struct {
 }
 
 type MessageQueueService interface {
-	Push() error
+	Publish() error
 	Comsume() error
 	Close() error
 }
@@ -59,7 +59,7 @@ func NewRabbitMQService(config MessageQueueConfig, logger *zerolog.Logger) Messa
 	}
 }
 
-func (r *rabbitMQService) Push() error {
+func (r *rabbitMQService) Publish() error {
 	return nil
 }
 

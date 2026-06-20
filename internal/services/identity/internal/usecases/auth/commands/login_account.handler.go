@@ -38,9 +38,9 @@ type loginIPRateLimiter struct {
 }
 
 var (
-	mu                 sync.Mutex
+	loginMutex         sync.Mutex
 	clientIPs          = make(map[string]*loginIPRateLimiter)
-	LOGIN_ATTEMPT_TTL  int
+	LOGIN_ATTEMPT_TTL  time.Duration
 	MAX_LOGIN_ATTEMPTS int
 )
 
@@ -57,7 +57,7 @@ func NewLoginAccountHandler(userRepository repository.UserRepository, jwtService
 		panic("nil hashService")
 	}
 
-	LOGIN_ATTEMPT_TTL = int(5 * time.Minute)
+	LOGIN_ATTEMPT_TTL = 5 * time.Minute
 	MAX_LOGIN_ATTEMPTS = 3
 
 	return decorator.ApplyCommandDecorators(
@@ -148,12 +148,12 @@ func (h *loginAccountHandler) checkLoginAttempt(ip string) error {
 }
 
 func (h *loginAccountHandler) getLoginAttempt(ip string) *rate.Limiter {
-	mu.Lock()
-	defer mu.Unlock()
+	loginMutex.Lock()
+	defer loginMutex.Unlock()
 
 	client, exists := clientIPs[ip]
 	if !exists {
-		limiter := rate.NewLimiter(rate.Limit(MAX_LOGIN_ATTEMPTS), MAX_LOGIN_ATTEMPTS)
+		limiter := rate.NewLimiter(rate.Limit(float32(MAX_LOGIN_ATTEMPTS)/float32(LOGIN_ATTEMPT_TTL.Seconds())), MAX_LOGIN_ATTEMPTS)
 
 		newClientIp := &loginIPRateLimiter{
 			Limiter:  limiter,
@@ -171,8 +171,8 @@ func (h *loginAccountHandler) getLoginAttempt(ip string) *rate.Limiter {
 }
 
 func (h *loginAccountHandler) cleanUpClientIP(ip string) {
-	mu.Lock()
-	defer mu.Unlock()
+	loginMutex.Lock()
+	defer loginMutex.Unlock()
 
 	delete(clientIPs, ip)
 }

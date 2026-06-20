@@ -14,6 +14,7 @@ type Usecase struct {
 type Commands struct {
 	LoginAccountHandler    authCommand.LoginAccountHandler
 	RegisterAccountHandler authCommand.RegisterAccountHandler
+	ForgotPasswordHandler  authCommand.ForgotPasswordHandler
 	AddAddressHandler      userCommand.AddAddressHandler
 	UpdateProfileHandler   userCommand.UpdateProfileHandler
 }

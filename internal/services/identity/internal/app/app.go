@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path"
 	"syscall"
 	"time"
 
@@ -22,10 +23,12 @@ import (
 	v1routes "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/endpoints/routes/v1"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/db"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/db/repository"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/external/mail"
 	ext_redis "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/external/redis"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils"
 	identity_validator "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils/validation"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
-	command "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands"
+	authCommand "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands"
 	usersCommand "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/commands"
 	query "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/queries"
 )
@@ -62,6 +65,24 @@ func NewApplication() (*Application, error) {
 	)
 	hashService := hash_pkg.NewHashService()
 
+	rootDir := utils.GetWorkingDir()
+
+	mailPath := path.Join(rootDir, "logs/identity/mail.log")
+	mailLogger := logger.NewLogger(logger.LoggerConfig{
+		Level:      "info",
+		Filename:   mailPath,
+		MaxSize:    1,
+		MaxBackups: 5,
+		MaxAge:     5,
+		Compress:   true,
+		AppEnv:     config.AppConfig.Server.AppEnv,
+	})
+	mailFactory, err := mail.NewMailFactory(mail.GoogleMailProvider)
+	if err != nil {
+		logger.Log.Fatal().Err(err).Msg("❌ Mail factory init failed")
+	}
+	mailService := mail.NewMailService(mailFactory,mailLogger)
+
 	// rabbitmq
 	messageQueueService := rabbitmq.NewRabbitMQService(
 		rabbitmq.MessageQueueConfig{
@@ -76,8 +97,9 @@ func NewApplication() (*Application, error) {
 
 	usecases := &usecase.Usecase{
 		Commands: usecase.Commands{
-			LoginAccountHandler:    command.NewLoginAccountHandler(userRepository, jwtService, hashService),
-			RegisterAccountHandler: command.NewRegisterAccountHandler(userRepository),
+			LoginAccountHandler:    authCommand.NewLoginAccountHandler(userRepository, jwtService, hashService),
+			RegisterAccountHandler: authCommand.NewRegisterAccountHandler(userRepository),
+			ForgotPasswordHandler:  authCommand.NewForgotPasswordHandler(messageQueueService, cacheService, mailService),
 			AddAddressHandler:      usersCommand.NewAddAddressHandler(),
 			UpdateProfileHandler:   usersCommand.NewUpdateProfileHandler(),
 		},
