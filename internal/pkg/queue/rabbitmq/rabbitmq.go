@@ -1,6 +1,8 @@
 package rabbitmq
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/rs/zerolog"
@@ -22,8 +24,8 @@ type rabbitMQService struct {
 }
 
 type MessageQueueService interface {
-	Publish() error
-	Comsume() error
+	Publish(ctx context.Context, queue string, message any) error
+	Consume(ctx context.Context, queue string, handler func([]byte) error) error
 	Close() error
 }
 
@@ -59,14 +61,81 @@ func NewRabbitMQService(config MessageQueueConfig, logger *zerolog.Logger) Messa
 	}
 }
 
-func (r *rabbitMQService) Publish() error {
+func (r *rabbitMQService) Publish(ctx context.Context, queue string, message any) error {
+	_, err := r.channel.QueueDeclare(queue, true, false, false, false, nil)
+	if err != nil {
+		r.logger.Error().Err(err).Msg("failed to declare queue")
+		return err
+	}
+
+	body, err := json.Marshal(message)
+	if err != nil {
+		r.logger.Error().Err(err).Msg("failed to parse message")
+		return err
+	}
+
+	err = r.channel.PublishWithContext(ctx, "", queue, false, false, amqp091.Publishing{
+		ContentType: "text/plain",
+		Body:        []byte(body),
+	})
+
+	if err != nil {
+		r.logger.Error().Err(err).Msg("failed to publish message")
+		return err
+	}
+
 	return nil
 }
 
-func (r *rabbitMQService) Comsume() error {
+func (r *rabbitMQService) Consume(ctx context.Context, queue string, handler func([]byte) error) error {
+	_, err := r.channel.QueueDeclare(queue, true, false, false, false, nil)
+	if err != nil {
+		r.logger.Error().Err(err).Msg("failed to declare queue")
+		return err
+	}
+
+	msgs, err := r.channel.Consume(queue, "", false, false, false, false, nil)
+	if err != nil {
+		r.logger.Error().Err(err).Msg("failed to declare consume")
+		return err
+	}
+
+	go func() {
+		for {
+			select {
+			case msg, ok := <-msgs:
+				if !ok {
+					return
+				}
+
+				if err := handler(msg.Body); err != nil {
+					msg.Nack(false, false)
+				} else {
+					msg.Ack(false)
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
 	return nil
 }
 
 func (r *rabbitMQService) Close() error {
+	if r.channel != nil {
+		if err := r.channel.Close(); err != nil {
+			r.logger.Error().Err(err).Msg("failed to close channel")
+			return err
+		}
+	}
+
+	if r.conn != nil {
+		if err := r.conn.Close(); err != nil {
+			r.logger.Error().Err(err).Msg("failed to close connection")
+			return err
+		}
+	}
+
 	return nil
 }

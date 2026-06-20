@@ -7,6 +7,9 @@ IDENTITY_DB_CONN_STRING = postgresql://$(IDENTITY_POSTGRES_DB_USER):$(IDENTITY_P
 start-identity:
 	go run ./internal/services/identity/cmd/server/main.go ENV=$(ENV)
 
+start-identity-worker:
+	go run ./internal/services/identity/cmd/background_worker ENV=$(ENV)
+
 identity-sqlc:
 	sqlc generate
 

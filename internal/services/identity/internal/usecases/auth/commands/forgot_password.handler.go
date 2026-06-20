@@ -108,13 +108,9 @@ func (h *forgotPasswordHandler) Handle(ctx context.Context, cmd ForgotPasswordCo
 			resetLink),
 	}
 
-	if err := h.mailService.SendMail(ctx, mailContent); err != nil {
+	if err := h.mq.Publish(ctx, "reset_password_queue", mailContent); err != nil {
 		return false, err
 	}
-
-	// if err := h.mq.Publish("reset_password_queue", mailContent); err != nil {
-	// 	return false, err
-	// }
 
 	return true, nil
 }
