@@ -66,10 +66,53 @@ services:
       timeout: 10s
       retries: 3
 
+  ygz.grafana:
+    image: grafana/grafana:11.0.0
+    container_name: ygz.grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - ygz.logs.loki
+    volumes:
+      - ygz-grafana-data:/var/lib/grafana
+    networks:
+      - ygz-app-network
+
+  ygz.logs.loki:
+    image: grafana/loki:2.9.0
+    container_name: ygz.logs.loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ygz-loki-data:/loki
+    networks:
+      - ygz-app-network
+
+  ygz.logs.promtail:
+    image: grafana/promtail:2.9.0
+    container_name: ygz.logs.promtail
+    restart: unless-stopped
+    volumes:
+      - ../logs:/var/log
+      - ./volumes/configs/promtail/config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - ygz.logs.loki
+    networks:
+      - ygz-app-network
+
 volumes:
   ygz-identity-postgres:
   ygz-redis:
   ygz-rabbitmq:
+  ygz-grafana-data:
+  ygz-loki-data:
 
 networks:
   ygz-app-network:
