@@ -1,0 +1,10 @@
+go 1.26.3
+
+use (
+	.
+	./internal/services/identity
+	./internal/services/catalog
+	./internal/services/basket
+	./internal/services/orders
+	./internal/services/discount
+)

@@ -1,0 +1,38 @@
+server:
+  port: 8080
+  app_env: "dev"
+database:
+  name: "identity"
+  database: "identity"
+  host: "127.0.0.1"
+  port: 5432
+  user: "admin"
+  password: "adminpassword"
+  ssl_mode: "disable"
+security:
+  jwt:
+    secret: "dev_secret_key_for_jwt_32bytes!!"
+    refresh_secret: "dev_refresh_secret_key_32bytes!!"
+    encryption_key: "dev_encryption_key_for_aes_32byt"
+    access_ttl: 900
+    refresh_ttl: 604800
+    issuer: "ygz_dev"
+cache:
+  redis:
+    db: 0
+    host: "127.0.0.1"
+    port: 6379
+    user: ""
+    password: ""
+message_queue:
+  rabbitmq:
+    host: "127.0.0.1"
+    port: 5672
+    user: "guest"
+    password: "guest"
+mail:
+  sender: "ygzteam_dev@ygz.com"
+  provider:
+    name: "google"
+    google:
+      app_password: ""

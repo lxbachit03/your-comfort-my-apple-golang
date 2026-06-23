@@ -1,0 +1,82 @@
+package route
+
+import (
+	"path"
+
+	"github.com/gin-contrib/gzip"
+	"github.com/gin-gonic/gin"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/middlewares"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/config"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils"
+	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
+	"github.com/rs/zerolog"
+)
+
+type Route interface {
+	Register(r *gin.RouterGroup)
+}
+
+func RegisterRoutes(r *gin.Engine, uc *usecase.Usecase, routes ...Route) {
+
+	rateLimterLogger, recoveryLogger, httpLogger := initLoggers()
+
+	// middlewares
+
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	r.Use(
+		middlewares.RateLimiterMiddleware(rateLimterLogger),
+		middlewares.CORSMiddleware(),
+		middlewares.TraceIdMiddleware(),
+		middlewares.HttpLoggerMiddleware(httpLogger),
+		middlewares.RecoveryMiddleware(recoveryLogger),
+		// middleware.ApiKeyMiddleware(),
+		// AuthMiddleware
+	)
+
+	v1ApiGroup := r.Group("/api/v1")
+
+	for _, route := range routes {
+		route.Register(v1ApiGroup)
+	}
+}
+
+func initLoggers() (*zerolog.Logger, *zerolog.Logger, *zerolog.Logger) {
+	rootDir := utils.GetWorkingDir()
+
+	rateLimiterPath := path.Join(rootDir, "logs/identity/rate_limiter.log")
+	recoveryLoggerPath := path.Join(rootDir, "logs/identity/recovery.log")
+	httpLoggerPath := path.Join(rootDir, "logs/identity/http.log")
+
+	rateLimterLogger := logger.NewLogger(logger.LoggerConfig{
+		Level:      "warning",
+		Filename:   rateLimiterPath,
+		MaxSize:    1,
+		MaxBackups: 5,
+		MaxAge:     5,
+		Compress:   true,
+		AppEnv:     config.AppConfig.Server.AppEnv,
+	})
+
+	recoveryLogger := logger.NewLogger(logger.LoggerConfig{
+		Level:      "error",
+		Filename:   recoveryLoggerPath,
+		MaxSize:    1,
+		MaxBackups: 5,
+		MaxAge:     5,
+		Compress:   true,
+		AppEnv:     config.AppConfig.Server.AppEnv,
+	})
+
+	httpLogger := logger.NewLogger(logger.LoggerConfig{
+		Level:      "info",
+		Filename:   httpLoggerPath,
+		MaxSize:    1,
+		MaxBackups: 5,
+		MaxAge:     5,
+		Compress:   true,
+		AppEnv:     config.AppConfig.Server.AppEnv,
+	})
+
+	return rateLimterLogger, recoveryLogger, httpLogger
+}

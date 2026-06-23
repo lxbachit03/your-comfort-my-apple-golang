@@ -1,0 +1,38 @@
+server:
+  port: 8080
+  app_env: "local"
+database:
+  name: "identity"
+  database: "identity"
+  host: "127.0.0.1"
+  port: 5432
+  user: "admin"
+  password: "adminpassword"
+  ssl_mode: "disable"
+security:
+  jwt:
+    secret: "local_secret_key_for_jwt_32bytes"
+    refresh_secret: "local_refresh_secret_key_32bytes"
+    encryption_key: "local_encryption_key_for_aes_32b"
+    access_ttl: 900
+    refresh_ttl: 604800
+    issuer: "ygz_local"
+cache:
+  redis:
+    db: 0
+    host: "127.0.0.1"
+    port: 6379
+    user: ""
+    password: ""
+message_queue:
+  rabbitmq:
+    host: "127.0.0.1"
+    port: 5672
+    user: "guest"
+    password: "guest"
+mail:
+  sender: "ygzteam@ygz.com"
+  provider:
+    name: "google"
+    google:
+      app_password: ""
