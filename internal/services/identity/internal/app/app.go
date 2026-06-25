@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	auth_pkg "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/auth/jwt"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/cache"
+	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/events"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/logger"
 	"github.com/lxbachit03/ygz-microservices-golang/internal/pkg/queue/rabbitmq"
 	hash_pkg "github.com/lxbachit03/ygz-microservices-golang/internal/pkg/security/hash"
@@ -28,9 +29,10 @@ import (
 	"github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils"
 	identity_validator "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/infrastructure/utils/validation"
 	usecase "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases"
-	authCommand "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands"
-	usersCommand "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/commands"
-	query "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/queries"
+	authCommands "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/auth/commands"
+	userCommands "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/commands"
+	userEvents "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/events/domain-events"
+	userQueries "github.com/lxbachit03/ygz-microservices-golang/internal/services/identity/internal/usecases/users/queries"
 )
 
 type Application struct {
@@ -81,7 +83,7 @@ func NewApplication() (*Application, error) {
 	if err != nil {
 		logger.Log.Fatal().Err(err).Msg("❌ Mail factory init failed")
 	}
-	mailService := mail.NewMailService(mailFactory,mailLogger)
+	mailService := mail.NewMailService(mailFactory, mailLogger)
 
 	// rabbitmq
 	messageQueueService := rabbitmq.NewRabbitMQService(
@@ -95,17 +97,23 @@ func NewApplication() (*Application, error) {
 	// repositories
 	userRepository := repository.NewUserRepository(db.DB)
 
+	// event bus
+	var domainEventBus = events.NewDomainEventBus()
+
 	usecases := &usecase.Usecase{
 		Commands: usecase.Commands{
-			LoginAccountHandler:    authCommand.NewLoginAccountHandler(userRepository, jwtService, hashService),
-			RegisterAccountHandler: authCommand.NewRegisterAccountHandler(userRepository),
-			ForgotPasswordHandler:  authCommand.NewForgotPasswordHandler(messageQueueService, cacheService, mailService),
-			AddAddressHandler:      usersCommand.NewAddAddressHandler(),
-			UpdateProfileHandler:   usersCommand.NewUpdateProfileHandler(),
+			LoginAccountHandler:    authCommands.NewLoginAccountHandler(userRepository, jwtService, hashService),
+			RegisterAccountHandler: authCommands.NewRegisterAccountHandler(userRepository, domainEventBus),
+			ForgotPasswordHandler:  authCommands.NewForgotPasswordHandler(messageQueueService, cacheService, mailService),
+			AddAddressHandler:      userCommands.NewAddAddressHandler(),
+			UpdateProfileHandler:   userCommands.NewUpdateProfileHandler(),
 		},
 		Queries: usecase.Queries{
-			GetUsersHandler:      query.NewGetUsersHandler(),
-			GetUserByUUIDHandler: query.NewGetUserByUUIDHandler(userRepository),
+			GetUsersHandler:      userQueries.NewGetUsersHandler(),
+			GetUserByUUIDHandler: userQueries.NewGetUserByUUIDHandler(userRepository),
+		},
+		Events: usecase.DomainEvents{
+			UserCreatedDomainHandler: userEvents.NewUserCreatedDomainEventHandler(domainEventBus),
 		},
 	}
 
